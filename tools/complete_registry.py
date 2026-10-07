@@ -60,6 +60,12 @@ class CompleteRegistry:
             "DesktopTool",
         )
 
+        self._register_optional(
+            "learning",
+            "tools.learning",
+            "LearningTool",
+        )
+
         self._register_universal_computer()
 
         self.register(

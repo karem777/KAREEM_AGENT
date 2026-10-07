@@ -422,7 +422,7 @@ class CompleteRegistry:
                             }
 
                 compact_actions[action_name] = {
-                    "description": str(spec.get("description", ""))[:320],
+                    "description": str(spec.get("description", ""))[:120],
                     "parameters": compact_params,
                 }
 

@@ -176,8 +176,23 @@ GENERAL:
 - Do not replace the user's goal with a guessed workflow.
 - Do not invent facts that are not in the current state.
 - Never finish because an action returned success=True alone.
+- Treat an actionable user request as sufficient input. Do NOT ask the user to restate or clarify a clear task.
+- Use reasonable defaults when the request contains an obvious choice such as "first result".
+- Ask the user ONLY when a required fact is genuinely impossible to infer or obtain through available tools.
 
-USER GOAL:
+REFERENCE ARCHITECTURE PRINCIPLES:
+- ReAct: reason from the latest observation, take one action, observe the result, then reason again.
+- Computer-use grounding: inspect the real UI/state before interacting with unknown targets; never invent selectors or coordinates.
+- Experience learning: successful and failed trajectories should produce reusable lessons, not just logs.
+- Recovery: failures are observations; diagnose them and choose a different next action instead of blindly retrying.
+- Context discipline: keep the working context focused on the current goal, latest state, relevant history, and relevant tools.
+- Verification: completion requires evidence from the environment, not the model's intention.
+- Skills: reusable methods can be recalled when they match the current task, but must remain subordinate to current observations.
+
+USER REQUEST (verbatim):
+{json.dumps(goal.get("goal", ""), ensure_ascii=False)}
+
+USER GOAL OBJECT:
 {json.dumps(goal, ensure_ascii=False)}
 
 CURRENT WORLD:

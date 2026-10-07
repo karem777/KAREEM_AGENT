@@ -313,79 +313,22 @@ Choose the next action from the LIVE TOOL SCHEMA.
         except Exception:
             pass
 
-        # ========================================================
-        # Compatibility fallback
-        # ========================================================
-
-        windows_domains = {
-            "windows",
-            "mixed",
-            "general",
-        }
-
-        if (
-            str(goal.get("domain", "")).lower()
-            in windows_domains
-            and "computer" in tools
-        ):
-            fallback_tool = "computer"
-        elif "browser" in tools:
-            fallback_tool = "browser"
-        elif tools:
-            fallback_tool = next(iter(tools))
-        else:
-            fallback_tool = ""
-
-        if (
-            fallback_tool in tools
-            and "inspect" in tools[fallback_tool].get(
-                "actions",
-                {},
-            )
-        ):
-            fallback_action = "inspect"
-        elif fallback_tool in tools:
-            available = list(
-                tools[fallback_tool].get(
-                    "actions",
-                    {},
-                ).keys()
-            )
-            fallback_action = (
-                available[0]
-                if available
-                else ""
-            )
-        else:
-            fallback_action = ""
-
+        # Compatibility fallback: ask the model for the decision again.
+        # Tool selection is never inferred from the goal domain.
         fallback_prompt = prompt + """
 
 Return exactly one JSON object:
-
 {"type":"tool_call","tool":"...","action":"...","arguments":{}}
-
 OR
-
 {"type":"finish","answer":"...","evidence":[]}
-
 OR
-
 {"type":"ask_user","question":"..."}
+Choose only from the LIVE TOOL SCHEMA.
 """
-
-        return self.brain.json(
-            fallback_prompt,
-            fallback={
-                "type": "tool_call",
-                "tool": fallback_tool,
-                "action": fallback_action,
-                "arguments": {},
-                "reason": (
-                    "Refresh current state before deciding."
-                ),
-                "expected": (
-                    "Fresh observation."
-                ),
-            },
-        )
+        try:
+            value = self.brain.json(fallback_prompt, fallback=None)
+            if isinstance(value, dict):
+                return value
+        except Exception:
+            pass
+        return {"type": "invalid_plan", "reason": "Planner could not obtain a valid model decision."}

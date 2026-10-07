@@ -1,5 +1,4 @@
 ﻿import json
-import json
 import os
 import time
 from pathlib import Path
@@ -59,10 +58,10 @@ class CompleteRunner:
                 actions = []
             return {"success": False, "error": f"Action not found: {tool_name}.{action}", "available_actions": actions}
         try:
-                    if tool_name == "computer":
-                        arguments = dict(arguments)
-                        arguments.setdefault("mode", self.execution_mode)
-                    return method(**arguments)
+            if tool_name == "computer":
+                arguments = dict(arguments)
+                arguments.setdefault("mode", self.execution_mode)
+            return method(**arguments)
         except TypeError as exc:
             return {"success": False, "error": f"Bad arguments for {tool_name}.{action}: {exc}"}
         except Exception as exc:
@@ -148,8 +147,14 @@ LAST 8 ACTIONS:
         if execution_mode:
             mode = str(execution_mode).strip().lower()
             self.execution_mode = "background" if mode == "background" else "visible"
+        stage_started = time.time()
+        print("KAREEM_AGENT GOAL COMPILE START", flush=True)
         contract = self.goal_compiler.compile(user_message)
+        print(f"KAREEM_AGENT GOAL COMPILE: {time.time() - stage_started:.2f}s", flush=True)
+
+        stage_started = time.time()
         experiences = self.experience.search(user_message, limit=5)
+        print(f"KAREEM_AGENT EXPERIENCE SEARCH: {time.time() - stage_started:.2f}s", flush=True)
         history: list[dict[str, Any]] = []
         recovery = {}
 

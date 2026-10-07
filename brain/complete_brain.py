@@ -20,7 +20,7 @@ class CompleteBrain:
     def _options(self):
         return {
             "temperature": 0,
-            "num_ctx": int(os.getenv("KAREEM_CONTEXT", "12288")),
+            "num_ctx": int(os.getenv("KAREEM_CONTEXT", "4096")),
         }
 
     def text(self, prompt: str) -> str:

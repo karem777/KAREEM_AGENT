@@ -295,12 +295,6 @@ LAST 8 ACTIONS:
                 }
 
             else:
-                    recovery = {
-                        "type": "continue",
-                        "missing": ["continue toward goal"],
-                    }
-
-            else:
                 recovery = {
                     "type": "tool_error",
                     "error": result.get("error", "unknown"),

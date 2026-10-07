@@ -4,7 +4,7 @@ import threading
 import sys
 import io
 
-from core.runner import AgentRunner
+from core.complete_runner import CompleteRunner
 
 
 class KAREEMGUI:
@@ -17,7 +17,7 @@ class KAREEMGUI:
         self.root.minsize(700, 500)
         self.root.configure(bg="#0f1117")
 
-        self.runner = AgentRunner("workspace")
+        self.runner = CompleteRunner("workspace")
 
         # =========================
         # HEADER
@@ -285,10 +285,13 @@ class KAREEMGUI:
     def finish_message(self, result):
 
         if isinstance(result, dict):
-            result = result.get(
-                "error",
-                "حدث خطأ غير معروف."
-            )
+            if result.get("success") and result.get("answer") is not None:
+                result = result.get("answer")
+            else:
+                result = result.get(
+                    "error",
+                    result.get("question", "حدث خطأ غير معروف.")
+                )
 
         self.add_agent_message(
             str(result)

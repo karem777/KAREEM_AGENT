@@ -7,7 +7,6 @@ from typing import Any
 from brain.complete_brain import CompleteBrain
 from brain.complete_planner import CompletePlanner
 from core.experience import ExperienceStore
-from core.fast_router import FastRouter
 from core.goal_contract import GoalContract
 from core.loop_guard import LoopGuard
 from core.world_model import WorldModel
@@ -31,10 +30,7 @@ class CompleteRunner:
         self.registry = CompleteRegistry(self.workspace)
         self.world = WorldModel()
         self.guard = LoopGuard()
-        self.fast_router = FastRouter()
         self.experience = ExperienceStore(self.workspace / "agent_memory")
-        self.fast_mode = os.getenv("KAREEM_FAST_MODE", "1") == "1"
-        self.verify_every_action = os.getenv("KAREEM_VERIFY_EVERY_ACTION", "0") == "1"
         self.execution_mode = os.getenv("KAREEM_EXECUTION_MODE", "visible").strip().lower()
         self.max_history_context = int(os.getenv("KAREEM_HISTORY_CONTEXT", "10"))
         self.max_recovery_attempts = int(os.getenv("KAREEM_MAX_RECOVERY", "3"))
@@ -99,23 +95,6 @@ class CompleteRunner:
             elif action in {"network", "storage", "processes", "services", "ports", "events", "installed_apps"}:
                 self.world.state.facts[f"windows_{action}"] = result
 
-    def _deterministic_completion(self, contract: dict[str, Any], history: list[dict[str, Any]]) -> tuple[bool, str]:
-        text = str(contract.get("goal", "")).lower()
-        last = history[-1] if history else {}
-        result = last.get("result") or {}
-        if contract.get("domain") == "research":
-            if last.get("tool") == "research" and last.get("action") in {"deep_research", "rank_projects"} and self._ok(result):
-                return True, "Research tool produced ranked evidence."
-        if any(k in text for k in ["Ø§ÙØªØ­ Ø£ÙˆÙ„ Ù†ØªÙŠØ¬Ø©", "Ø§ÙØªØ­ Ø§Ù„Ù†ØªÙŠØ¬Ø© Ø§Ù„Ø£ÙˆÙ„Ù‰", "open first result", "first result"]):
-            if last.get("tool") == "browser" and last.get("action") in {"click", "open_url", "navigate"} and self._ok(result):
-                domain = (self.world.state.domain or "").lower()
-                if domain and not any(x in domain for x in ["google.", "bing.", "duckduckgo.", "brave"]):
-                    return True, "Navigation evidence shows the requested first result was opened."
-        if any(k in text for k in ["Ø§Ø­ÙØ¸", "save", "Ø§ÙƒØªØ¨ ÙÙŠ Ù…Ù„Ù", "write to file"]):
-            if last.get("tool") in {"filesystem", "windows", "developer"} and last.get("action") in {"write_file", "write_text_file", "write_code"} and self._ok(result):
-                return True, "File-write evidence present."
-        return False, ""
-
     def _verifier(self, contract, world, history):
         deterministic, why = self._deterministic_completion(contract, history)
         if deterministic:
@@ -159,41 +138,6 @@ LAST 8 ACTIONS:
             "evidence": evidence,
         }
 
-    def _run_fast(self, task_id: str, user_message: str, fast_task) -> dict[str, Any] | None:
-        history: list[dict[str, Any]] = []
-        print(f"\nFAST PATH: {fast_task.kind} | {fast_task.reason}")
-        for step, plan in enumerate(fast_task.actions, 1):
-            tool = plan["tool"]
-            action = plan["action"]
-            args = plan.get("arguments", {})
-            guard = self.guard.check(self.world.state.fingerprint or "empty", tool, action, args)
-            if guard["blocked"]:
-                return None
-            print(f"\nFAST STEP {step}/{len(fast_task.actions)}: {tool}.{action} {args}")
-            result = self._execute(tool, action, args)
-            result = self._inspect_after(tool, action, result, force=(action == "inspect"))
-            self._world_from_result(tool, action, result)
-            history.append({"step": step, "tool": tool, "action": action, "arguments": args, "result": result})
-            print("OBSERVE:", json.dumps(result, ensure_ascii=False, indent=2))
-            if result.get("approval_required"):
-                return {"success": False, "needs_approval": True, "question": result.get("reason", "Approval required."), "task_id": task_id, "steps": step}
-            if not self._ok(result):
-                return None
-
-        deterministic = True
-        if fast_task.kind == "open_url":
-            reason = "Explicit URL open completed."
-        elif fast_task.kind == "search":
-            reason = "Search page opened and observed."
-        elif fast_task.kind == "search_first_result":
-            deterministic = self.world.state.url is not None and self.world.state.page_type not in {"search_results", "search_home", "agent_control_ui"}
-            reason = "First-result navigation completed with a non-search destination."
-        else:
-            deterministic, reason = self._deterministic_completion({"goal": user_message, "domain": "web"}, history)
-        if deterministic:
-            return self._finish(task_id, user_message, len(history), "ØªÙ… ØªÙ†ÙÙŠØ° Ø§Ù„Ø·Ù„Ø¨ Ø¨Ù†Ø¬Ø§Ø­.", history, reason)
-        return None
-
     def run(self, user_message: str, execution_mode: str | None = None):
         task_id = str(int(time.time() * 1000))
         print("KAREEM_AGENT TASK START", flush=True)
@@ -203,13 +147,6 @@ LAST 8 ACTIONS:
         if execution_mode:
             mode = str(execution_mode).strip().lower()
             self.execution_mode = "background" if mode == "background" else "visible"
-        if self.fast_mode:
-            fast_task = self.fast_router.route(user_message)
-            if fast_task:
-                fast_result = self._run_fast(task_id, user_message, fast_task)
-                if fast_result is not None:
-                    return fast_result
-
         contract = self.goal_compiler.compile(user_message)
         experiences = self.experience.search(user_message, limit=5)
         history: list[dict[str, Any]] = []
@@ -288,22 +225,6 @@ LAST 8 ACTIONS:
                 else {}
             )
 
-            # Hard safety/routing guard:
-            # Local Windows goals must use the computer tool, not browser.
-            if str(contract.get("domain", "")).lower() in {
-                "windows",
-                "desktop",
-                "local",
-                "system",
-            }:
-                if tool == "browser":
-                    recovery = {
-                        "type": "wrong_tool",
-                        "message": "This is a local Windows task. Use the computer tool.",
-                        "last_plan": plan,
-                    }
-                    continue
-
             guard = self.guard.check(
                 self.world.state.fingerprint,
                 tool,
@@ -368,43 +289,12 @@ LAST 8 ACTIONS:
                 }
 
             if self._ok(result):
-                deterministic, reason = self._deterministic_completion(
-                    contract,
-                    history,
-                )
+                recovery = {
+                    "type": "continue",
+                    "missing": ["continue toward goal"],
+                }
 
-                if deterministic:
-                    return self._finish(
-                        task_id,
-                        user_message,
-                        step,
-                        "تم تنفيذ الطلب بنجاح.",
-                        history,
-                        reason,
-                    )
-
-                if self.verify_every_action:
-                    done, reason, missing = self._verifier(
-                        contract,
-                        self.world,
-                        history,
-                    )
-
-                    if done:
-                        return self._finish(
-                            task_id,
-                            user_message,
-                            step,
-                            "تم تنفيذ الطلب بنجاح.",
-                            history,
-                            reason,
-                        )
-
-                    recovery = {
-                        "type": "continue",
-                        "missing": missing,
-                    }
-                else:
+            else:
                     recovery = {
                         "type": "continue",
                         "missing": ["continue toward goal"],

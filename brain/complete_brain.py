@@ -15,6 +15,7 @@ class CompleteBrain:
     def __init__(self, model=None, timeout=180):
         self.model = model or os.getenv("KAREEM_MODEL", "qwen3:8b")
         self.timeout = timeout
+        self.think = os.getenv("KAREEM_THINK", "0").strip().lower() in {"1", "true", "yes", "on"}
 
     def _options(self):
         return {
@@ -50,6 +51,7 @@ class CompleteBrain:
             "messages": messages,
             "options": self._options(),
             "keep_alive": os.getenv("KAREEM_KEEP_ALIVE", "10m"),
+            "think": self.think,
         }
 
         if tools:

@@ -84,27 +84,7 @@ class CompletePlanner:
                     },
                 },
             },
-            {
-                "type": "function",
-                "function": {
-                    "name": "ask_user",
-                    "description": (
-                        "Ask the user only when required information "
-                        "is genuinely missing."
-                    ),
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "question": {
-                                "type": "string",
-                            },
-                        },
-                        "required": [
-                            "question",
-                        ],
-                    },
-                },
-            },
+
         ]
 
     def _build_prompt(

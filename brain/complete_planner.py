@@ -202,133 +202,59 @@ Choose the next action from the LIVE TOOL SCHEMA.
         recovery=None,
         experiences=None,
     ):
-        prompt = self._build_prompt(
-            goal,
-            world,
-            history,
-            tools,
-            recovery,
-            experiences,
-        )
+        # Keep the planner call single-pass and compact. The model chooses
+        # behavior; the registry remains the source of executable capabilities.
+        prompt = f"""
+You are the decision brain of KAREEM_AGENT.
 
-        # ========================================================
-        # Native Ollama tool calling
-        # ========================================================
+Choose exactly ONE next step toward the user's goal.
+You are autonomous: never ask the user to clarify an actionable request.
+Use ONLY tools/actions that exist in LIVE TOOLS.
+Do not invent IDs, coordinates, controls, URLs, or unseen state.
+Use the latest WORLD observation and recover from failures.
+Do not finish until the goal is verified by evidence.
+
+Return JSON only:
+{{"type":"tool_call","tool":"...","action":"...","arguments":{{}}}}
+or
+{{"type":"finish","answer":"...","evidence":[]}}
+
+USER GOAL:
+{json.dumps(goal.get("goal", ""), ensure_ascii=False)}
+
+WORLD:
+{json.dumps(world, ensure_ascii=False)}
+
+RECENT HISTORY:
+{json.dumps(history[-4:], ensure_ascii=False)}
+
+RECOVERY:
+{json.dumps(recovery or {}, ensure_ascii=False)}
+
+RELEVANT EXPERIENCES:
+{json.dumps(experiences or [], ensure_ascii=False)}
+
+LIVE TOOLS:
+{json.dumps(tools, ensure_ascii=False)}
+""".strip()
 
         try:
-            response = self.brain.chat(
-                [
-                    {
-                        "role": "system",
-                        "content": (
-                            "You are KAREEM_AGENT. "
-                            "Use exactly ONE function call per cycle. "
-                            "Do not output a scripted workflow."
-                        ),
-                    },
-                    {
-                        "role": "user",
-                        "content": prompt,
-                    },
-                ],
-                tools=self._native_tools(),
-            )
+            value = self.brain.json(prompt, fallback=None)
+            if not isinstance(value, dict):
+                return {
+                    "type": "invalid_plan",
+                    "reason": "Planner returned a non-object decision.",
+                }
 
-            calls = response.get("tool_calls", []) or []
+            if value.get("type") == "ask_user":
+                return {
+                    "type": "invalid_plan",
+                    "reason": "Planner attempted clarification instead of using available tools.",
+                }
 
-            if calls:
-                call = calls[0]
-
-                name = call.get("name", "")
-                arguments = call.get("arguments", {})
-
-                if not isinstance(arguments, dict):
-                    arguments = {}
-
-                # -----------------------------
-                # Agent action
-                # -----------------------------
-
-                if name == "agent_action":
-                    return {
-                        "type": "tool_call",
-                        "tool": str(
-                            arguments.get("tool", "")
-                        ).strip(),
-                        "action": str(
-                            arguments.get("action", "")
-                        ).strip(),
-                        "arguments": (
-                            arguments.get("arguments", {})
-                            if isinstance(
-                                arguments.get("arguments", {}),
-                                dict,
-                            )
-                            else {}
-                        ),
-                        "reason": (
-                            "Native model decision from current state."
-                        ),
-                        "expected": (
-                            "The action changes or refreshes world state."
-                        ),
-                    }
-
-                # -----------------------------
-                # Finish
-                # -----------------------------
-
-                if name == "finish_task":
-                    return {
-                        "type": "finish",
-                        "answer": str(
-                            arguments.get("answer", "")
-                        ),
-                        "evidence": arguments.get(
-                            "evidence",
-                            [],
-                        ),
-                    }
-
-                # -----------------------------
-                # Ask user
-                # -----------------------------
-
-                if name == "ask_user":
-                    return {
-                        "type": "ask_user",
-                        "question": str(
-                            arguments.get(
-                                "question",
-                                "",
-                            )
-                        ),
-                    }
-
-        except Exception:
-            pass
-
-        # Compatibility fallback: ask the model for the decision again.
-        # Clarification is deliberately not an available planner outcome.
-        fallback_prompt = prompt + """
-
-Return exactly one JSON object and nothing else:
-{"type":"tool_call","tool":"...","action":"...","arguments":{}}
-OR
-{"type":"finish","answer":"...","evidence":[]}
-
-Never return ask_user.
-Choose only from the LIVE TOOL SCHEMA.
-"""
-        try:
-            value = self.brain.json(fallback_prompt, fallback=None)
-            if isinstance(value, dict):
-                if value.get("type") == "ask_user":
-                    return {
-                        "type": "invalid_plan",
-                        "reason": "Planner attempted clarification instead of using available tools.",
-                    }
-                return value
-        except Exception:
-            pass
-        return {"type": "invalid_plan", "reason": "Planner could not obtain a valid model decision."}
+            return value
+        except Exception as exc:
+            return {
+                "type": "invalid_plan",
+                "reason": f"Planner decision failed: {exc}",
+            }

@@ -7,26 +7,19 @@ from typing import Any
 from brain.complete_brain import CompleteBrain
 from brain.complete_planner import CompletePlanner
 from core.experience import ExperienceStore
-from core.goal_contract import GoalContract
 from core.loop_guard import LoopGuard
 from core.world_model import WorldModel
 from tools.complete_registry import CompleteRegistry
 
 
 class CompleteRunner:
-    """Fast-first autonomous runner.
-
-    Deterministic low-risk tasks bypass the heavy LLM planning path. Complex
-    tasks retain the full 80-cycle cognitive loop, with lazy perception and
-    lazy middle-of-task verification.
-    """
+    """Autonomous runner driven by the model and live tool observations."""
 
     def __init__(self, workspace, max_steps=80):
         self.workspace = Path(workspace).resolve()
         self.max_steps = int(os.getenv("KAREEM_MAX_STEPS", str(max_steps)))
         self.brain = CompleteBrain()
         self.planner = CompletePlanner(self.brain)
-        self.goal_compiler = GoalContract(self.brain)
         self.registry = CompleteRegistry(self.workspace)
         self.world = WorldModel()
         self.guard = LoopGuard()
@@ -147,11 +140,9 @@ LAST 8 ACTIONS:
         if execution_mode:
             mode = str(execution_mode).strip().lower()
             self.execution_mode = "background" if mode == "background" else "visible"
-        stage_started = time.time()
-        print("KAREEM_AGENT GOAL COMPILE START", flush=True)
-        contract = self.goal_compiler.compile(user_message)
-        print(f"KAREEM_AGENT GOAL COMPILE: {time.time() - stage_started:.2f}s", flush=True)
-
+        # Goal understanding is intentionally part of the planner call.
+        # Do not spend a separate LLM round compiling a contract first.
+        contract = {"goal": user_message}
         stage_started = time.time()
         experiences = self.experience.search(user_message, limit=5)
         print(f"KAREEM_AGENT EXPERIENCE SEARCH: {time.time() - stage_started:.2f}s", flush=True)

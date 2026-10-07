@@ -154,8 +154,11 @@ LAST 8 ACTIONS:
         self.guard = LoopGuard()
 
         for step in range(1, self.max_steps + 1):
-            tools = self.registry.describe()
+            stage_started = time.time()
+            tools = self.registry.describe_for_planner()
+            print(f"KAREEM_AGENT TOOL CATALOG: {time.time() - stage_started:.2f}s", flush=True)
 
+            stage_started = time.time()
             plan = self.planner.plan(
                 contract,
                 self.world.state.compact(),
@@ -165,6 +168,7 @@ LAST 8 ACTIONS:
                 experiences,
             )
 
+            print(f"KAREEM_AGENT PLANNER: {time.time() - stage_started:.2f}s", flush=True)
             ptype = plan.get("type") if isinstance(plan, dict) else None
 
             print()

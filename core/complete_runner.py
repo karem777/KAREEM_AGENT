@@ -6,6 +6,7 @@ from typing import Any
 
 from brain.complete_brain import CompleteBrain
 from brain.complete_planner import CompletePlanner
+from core.conversation_store import ConversationStore
 from core.experience import ExperienceStore
 from core.loop_guard import LoopGuard
 from core.world_model import WorldModel
@@ -13,7 +14,12 @@ from tools.complete_registry import CompleteRegistry
 
 
 class CompleteRunner:
-    """Autonomous runner driven by the model and live tool observations."""
+    """
+    Supervisor + agent worker runtime.
+
+    The model owns behavior. The runtime owns execution, observation,
+    safety, bounded recovery, evidence, and durable conversation memory.
+    """
 
     def __init__(self, workspace, max_steps=80):
         self.workspace = Path(workspace).resolve()
@@ -24,57 +30,78 @@ class CompleteRunner:
         self.world = WorldModel()
         self.guard = LoopGuard()
         self.experience = ExperienceStore(self.workspace / "agent_memory")
+        self.conversation = ConversationStore(self.workspace / "agent_memory")
         self.execution_mode = os.getenv("KAREEM_EXECUTION_MODE", "visible").strip().lower()
-        self.max_history_context = int(os.getenv("KAREEM_HISTORY_CONTEXT", "10"))
         self.max_recovery_attempts = int(os.getenv("KAREEM_MAX_RECOVERY", "3"))
         self._run_started_at = None
 
     @staticmethod
     def _ok(result):
-        return isinstance(result, dict) and result.get("success") is not False and not result.get("approval_required")
-
-    def _reset_session(self):
-        """Reset per-task world/guard state so tasks cannot leak state."""
-        self.world = WorldModel()
-        self.guard = LoopGuard()
-        self._run_started_at = time.time()
+        return (
+            isinstance(result, dict)
+            and result.get("success") is not False
+            and not result.get("approval_required")
+        )
 
     def _execute(self, tool_name: str, action: str, arguments: dict[str, Any]):
         tool = self.registry.get(tool_name)
         if not tool:
-            return {"success": False, "error": f"Unknown tool: {tool_name}", "available": list(self.registry.tools)}
+            return {
+                "success": False,
+                "error": f"Unknown tool: {tool_name}",
+                "available": list(self.registry.tools),
+            }
+
         method = getattr(tool, action, None)
         if not callable(method):
             try:
                 actions = list(tool.describe().get("actions", {}).keys())
             except Exception:
                 actions = []
-            return {"success": False, "error": f"Action not found: {tool_name}.{action}", "available_actions": actions}
-        try:
-            if tool_name == "computer":
-                arguments = dict(arguments)
-                arguments.setdefault("mode", self.execution_mode)
-            return method(**arguments)
-        except TypeError as exc:
-            return {"success": False, "error": f"Bad arguments for {tool_name}.{action}: {exc}"}
-        except Exception as exc:
-            return {"success": False, "error": f"{type(exc).__name__}: {exc}"}
+            return {
+                "success": False,
+                "error": f"Action not found: {tool_name}.{action}",
+                "available_actions": actions,
+            }
 
-    def _inspect_after(self, tool: str, action: str, result: dict[str, Any], force=False):
+        try:
+            args = dict(arguments)
+            if tool_name == "computer":
+                args.setdefault("mode", self.execution_mode)
+            return method(**args)
+        except TypeError as exc:
+            return {
+                "success": False,
+                "error": f"Bad arguments for {tool_name}.{action}: {exc}",
+            }
+        except Exception as exc:
+            return {
+                "success": False,
+                "error": f"{type(exc).__name__}: {exc}",
+            }
+
+    def _inspect_after(self, tool: str, action: str, result: dict[str, Any]):
         if tool != "browser" or action == "inspect" or not self._ok(result):
             return result
+
         browser = self.registry.get("browser")
         inspect = getattr(browser, "inspect", None) if browser else None
         if not callable(inspect):
-            return result
-        needs = force or action in {"click", "fill", "press_key", "navigate"}
-        if not needs:
             self.world.observe(result)
             return result
+
+        if action not in {"click", "fill", "press_key", "navigate", "open_url", "type_text"}:
+            self.world.observe(result)
+            return result
+
         try:
             perception = inspect()
             self.world.observe(perception)
-            return {"action_result": result, "auto_perception": perception, "success": True}
+            return {
+                "action_result": result,
+                "auto_perception": perception,
+                "success": True,
+            }
         except Exception:
             self.world.observe(result)
             return result
@@ -85,17 +112,26 @@ class CompleteRunner:
         elif tool == "windows" and self._ok(result):
             if action == "get_system_info":
                 self.world.state.facts["windows_system"] = result
-            elif action in {"network", "storage", "processes", "services", "ports", "events", "installed_apps"}:
+            elif action in {
+                "network",
+                "storage",
+                "processes",
+                "services",
+                "ports",
+                "events",
+                "installed_apps",
+            }:
                 self.world.state.facts[f"windows_{action}"] = result
 
     def _verifier(self, contract, world, history):
-        deterministic, why = self._deterministic_completion(contract, history)
-        if deterministic:
-            return True, why, []
-        prompt = f'''
-You are the final evidence verifier for an autonomous agent.
-Return JSON only: {{"complete": true|false, "reason": "...", "missing": ["..."]}}
-Do not reward intentions. Only actual evidence counts.
+        prompt = f"""
+You are KAREEM_AGENT's independent completion verifier.
+
+Return JSON only:
+{{"complete":true|false,"reason":"...","missing":["..."]}}
+
+The model that acted is not allowed to decide completion by intention.
+Judge only observable evidence.
 
 GOAL:
 {json.dumps(contract, ensure_ascii=False)}
@@ -103,26 +139,47 @@ GOAL:
 WORLD:
 {json.dumps(world.state.compact(), ensure_ascii=False)}
 
-LAST 8 ACTIONS:
+RECENT ACTIONS:
 {json.dumps(history[-8:], ensure_ascii=False)}
-'''
-        value = self.brain.json(prompt, fallback={"complete": False, "reason": "Verifier unavailable", "missing": ["verified completion evidence"]})
-        return bool(value.get("complete")), str(value.get("reason", "")), value.get("missing", [])
+""".strip()
+
+        value = self.brain.json(
+            prompt,
+            fallback={
+                "complete": False,
+                "reason": "Verifier unavailable.",
+                "missing": ["independent completion evidence"],
+            },
+        )
+        if not isinstance(value, dict):
+            return False, "Verifier returned an invalid result.", ["verification"]
+        return (
+            bool(value.get("complete")),
+            str(value.get("reason") or ""),
+            value.get("missing") if isinstance(value.get("missing"), list) else [],
+        )
 
     def _finish(self, task_id, user_message, step, answer, history, reason=""):
         elapsed = round(time.time() - self._run_started_at, 3) if self._run_started_at else None
-        evidence = history[-3:]
+        evidence = history[-4:]
+
         self.experience.append({
             "task_id": task_id,
             "goal": user_message,
             "outcome": "success",
             "steps": step,
             "elapsed_seconds": elapsed,
-            "lesson": reason or "Task completed with verified evidence.",
+            "lesson": reason or "Task completed with independently verified evidence.",
             "evidence": evidence,
         })
+        self.conversation.append(
+            "assistant",
+            answer,
+            {"task_id": task_id, "outcome": "success", "steps": step},
+        )
         return {
             "success": True,
+            "mode": "task",
             "answer": answer,
             "reason": reason,
             "steps": step,
@@ -131,34 +188,41 @@ LAST 8 ACTIONS:
             "evidence": evidence,
         }
 
+    def _record_failure(self, task_id, user_message, step, lesson):
+        self.experience.append({
+            "task_id": task_id,
+            "goal": user_message,
+            "outcome": "failure",
+            "steps": step,
+            "lesson": lesson,
+        })
+
     def run(self, user_message: str, execution_mode: str | None = None):
         task_id = str(int(time.time() * 1000))
+        self._run_started_at = time.time()
         print("KAREEM_AGENT TASK START", flush=True)
 
-
-        # Store execution mode for local computer actions.
         if execution_mode:
             mode = str(execution_mode).strip().lower()
             self.execution_mode = "background" if mode == "background" else "visible"
-        # Goal understanding is intentionally part of the planner call.
-        # Do not spend a separate LLM round compiling a contract first.
-        contract = {"goal": user_message}
-        stage_started = time.time()
-        experiences = self.experience.search(user_message, limit=5)
-        print(f"KAREEM_AGENT EXPERIENCE SEARCH: {time.time() - stage_started:.2f}s", flush=True)
-        history: list[dict[str, Any]] = []
-        recovery = {}
 
-        # Reset per-task state.
+        self.conversation.append("user", user_message)
+        conversation = self.conversation.recent(limit=12)
+
+        contract = {"goal": user_message}
+        experiences = self.experience.search(user_message, limit=5)
+        history: list[dict[str, Any]] = []
+        recovery: dict[str, Any] = {}
+        invalid_streak = 0
+        recovery_streak = 0
+
         self.world = WorldModel()
         self.guard = LoopGuard()
 
         for step in range(1, self.max_steps + 1):
-            stage_started = time.time()
             tools = self.registry.describe_for_planner()
-            print(f"KAREEM_AGENT TOOL CATALOG: {time.time() - stage_started:.2f}s", flush=True)
 
-            stage_started = time.time()
+            started = time.time()
             plan = self.planner.plan(
                 contract,
                 self.world.state.compact(),
@@ -166,24 +230,48 @@ LAST 8 ACTIONS:
                 tools,
                 recovery,
                 experiences,
+                conversation,
+            )
+            print(
+                f"KAREEM_AGENT PLANNER: {time.time() - started:.2f}s",
+                flush=True,
             )
 
-            print(f"KAREEM_AGENT PLANNER: {time.time() - stage_started:.2f}s", flush=True)
             ptype = plan.get("type") if isinstance(plan, dict) else None
 
             print()
             print("=" * 78)
-            print(f"KAREEM_AGENT COMPLETE | STEP {step}/{self.max_steps}")
-            print("MODE:", self.execution_mode)
+            print(f"KAREEM_AGENT | STEP {step}/{self.max_steps}")
             print("GOAL:", json.dumps(contract, ensure_ascii=False))
             print("WORLD:", json.dumps(self.world.state.compact(), ensure_ascii=False))
             print("PLAN:", json.dumps(plan, ensure_ascii=False, indent=2))
 
-            if ptype == "ask_user":
+            # Supervisor/Talker mode.
+            if ptype == "chat":
+                answer = str(plan.get("content") or "").strip()
+                if not answer:
+                    self._record_failure(
+                        task_id,
+                        user_message,
+                        step,
+                        "Planner returned an empty conversational response.",
+                    )
+                    return {
+                        "success": False,
+                        "mode": "chat",
+                        "error": "Planner returned an empty response.",
+                        "task_id": task_id,
+                    }
+
+                self.conversation.append(
+                    "assistant",
+                    answer,
+                    {"task_id": task_id, "outcome": "chat"},
+                )
                 return {
-                    "success": False,
-                    "needs_user": True,
-                    "question": plan.get("question", "Need clarification."),
+                    "success": True,
+                    "mode": "chat",
+                    "answer": answer,
                     "task_id": task_id,
                 }
 
@@ -198,7 +286,7 @@ LAST 8 ACTIONS:
                         task_id,
                         user_message,
                         step,
-                        plan.get("answer", "Task completed."),
+                        plan.get("answer", "تم تنفيذ المهمة والتحقق منها."),
                         history,
                         reason,
                     )
@@ -207,24 +295,68 @@ LAST 8 ACTIONS:
                     "type": "premature_finish",
                     "reason": reason,
                     "missing": missing,
+                    "instruction": "Continue working; completion is not proven.",
                 }
+                recovery_streak += 1
+                if recovery_streak >= self.max_recovery_attempts:
+                    self._record_failure(
+                        task_id,
+                        user_message,
+                        step,
+                        "Repeated premature completion without evidence.",
+                    )
+                    return {
+                        "success": False,
+                        "mode": "task",
+                        "error": "Agent could not produce completion evidence.",
+                        "missing": missing,
+                        "task_id": task_id,
+                        "steps": step,
+                    }
                 continue
 
             if ptype != "tool_call":
+                invalid_streak += 1
                 recovery = {
                     "type": "invalid_plan",
                     "plan": plan,
+                    "instruction": "Produce either a real tool_call, a verified finish, or a natural chat response.",
                 }
+                if invalid_streak >= self.max_recovery_attempts:
+                    self._record_failure(
+                        task_id,
+                        user_message,
+                        step,
+                        f"Planner remained invalid after {invalid_streak} bounded recovery attempts.",
+                    )
+                    return {
+                        "success": False,
+                        "mode": "task",
+                        "error": "Planner failed to produce a valid decision; stopped safely instead of looping.",
+                        "task_id": task_id,
+                        "steps": step,
+                    }
                 continue
 
-            tool = str(plan.get("tool", "")).strip()
-            action = str(plan.get("action", "")).strip()
+            invalid_streak = 0
+            tool = str(plan.get("tool") or "").strip()
+            action = str(plan.get("action") or "").strip()
+            args = plan.get("arguments") if isinstance(plan.get("arguments"), dict) else {}
 
-            args = (
-                plan.get("arguments")
-                if isinstance(plan.get("arguments"), dict)
-                else {}
-            )
+            if not tool or not action:
+                recovery = {
+                    "type": "invalid_tool_call",
+                    "instruction": "Select an actual tool and action from LIVE TOOLS.",
+                }
+                invalid_streak += 1
+                if invalid_streak >= self.max_recovery_attempts:
+                    return {
+                        "success": False,
+                        "mode": "task",
+                        "error": "Planner repeatedly produced an incomplete tool call.",
+                        "task_id": task_id,
+                    }
+                continue
 
             guard = self.guard.check(
                 self.world.state.fingerprint,
@@ -237,25 +369,22 @@ LAST 8 ACTIONS:
                 recovery = {
                     "type": "loop_detected",
                     "guard": guard,
-                    "message": "Choose a materially different action or refresh the world.",
+                    "instruction": "Do not repeat the same action on the same state. Refresh or change strategy.",
                 }
-
                 if guard["count"] >= 4:
-                    self.experience.append({
-                        "task_id": task_id,
-                        "goal": user_message,
-                        "outcome": "stuck",
-                        "steps": step,
-                        "lesson": "Repeated same action on same world state.",
-                    })
-
+                    self._record_failure(
+                        task_id,
+                        user_message,
+                        step,
+                        "Loop guard stopped repeated actions on unchanged state.",
+                    )
                     return {
                         "success": False,
-                        "error": "Agent detected a loop and stopped instead of repeating it indefinitely.",
+                        "mode": "task",
+                        "error": "Execution stopped because the agent entered a repeated-action loop.",
                         "task_id": task_id,
                         "steps": step,
                     }
-
                 continue
 
             result = self._execute(tool, action, args)
@@ -268,23 +397,25 @@ LAST 8 ACTIONS:
                 "action": action,
                 "arguments": args,
                 "result": result,
-                "expected": plan.get("expected"),
                 "reason": plan.get("reason"),
             })
 
             print(
                 "OBSERVE:",
-                json.dumps(result, ensure_ascii=False, indent=2),
+                json.dumps(result, ensure_ascii=False, indent=2, default=str),
             )
 
-            if result.get("approval_required"):
+            if isinstance(result, dict) and result.get("approval_required"):
+                self.conversation.append(
+                    "assistant",
+                    str(result.get("reason") or "Approval is required to continue."),
+                    {"task_id": task_id, "needs_approval": True},
+                )
                 return {
                     "success": False,
+                    "mode": "task",
                     "needs_approval": True,
-                    "question": result.get(
-                        "reason",
-                        "Approval required.",
-                    ),
+                    "question": result.get("reason", "Approval required."),
                     "task_id": task_id,
                     "steps": step,
                 }
@@ -292,43 +423,41 @@ LAST 8 ACTIONS:
             if self._ok(result):
                 recovery = {
                     "type": "continue",
-                    "missing": ["continue toward goal"],
+                    "instruction": "Use the new observation to decide the next action.",
                 }
-
+                recovery_streak = 0
             else:
                 recovery = {
                     "type": "tool_error",
-                    "error": result.get("error", "unknown"),
-                    "last_action": {
-                        "tool": tool,
-                        "action": action,
-                    },
-                    "message": "Analyze the exact error and choose a different recovery path.",
+                    "error": result.get("error", "unknown") if isinstance(result, dict) else repr(result),
+                    "last_action": {"tool": tool, "action": action},
+                    "instruction": "Analyze the exact failure and recover with a different useful action.",
                 }
+                recovery_streak += 1
+                if recovery_streak >= self.max_recovery_attempts:
+                    self._record_failure(
+                        task_id,
+                        user_message,
+                        step,
+                        f"Tool recovery budget exhausted after: {recovery.get('error')}",
+                    )
+                    return {
+                        "success": False,
+                        "mode": "task",
+                        "error": "Agent stopped after bounded recovery attempts.",
+                        "task_id": task_id,
+                        "steps": step,
+                    }
 
-        self.experience.append({
-            "task_id": task_id,
-            "goal": user_message,
-            "outcome": "step_limit",
-            "steps": self.max_steps,
-            "lesson": "Goal was not verified within the step budget.",
-        })
-
+        self._record_failure(
+            task_id,
+            user_message,
+            self.max_steps,
+            "Goal was not verified within the cognitive step budget.",
+        )
         return {
             "success": False,
-            "error": f"Task stopped after {self.max_steps} cognitive cycles without verified completion.",
+            "mode": "task",
+            "error": f"Task stopped after {self.max_steps} adaptive agent steps.",
             "task_id": task_id,
         }
-
-
-
-
-
-
-
-
-
-
-
-
-

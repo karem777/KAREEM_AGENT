@@ -392,6 +392,47 @@ class CompleteRegistry:
 
         return parameters
 
+    def describe_for_planner(self):
+        """Compact live capability catalog for local-model planning.
+
+        Keep capability names, action names, and parameter contracts while
+        removing verbose metadata that wastes the local model context window.
+        """
+        full = self.describe()
+        compact = {}
+
+        for name, description in full.items():
+            if name == "_load_errors":
+                continue
+            actions = description.get("actions", {}) if isinstance(description, dict) else {}
+            compact_actions = {}
+
+            for action_name, spec in actions.items():
+                if not isinstance(spec, dict):
+                    spec = {"description": str(spec)}
+                params = spec.get("parameters", {})
+                compact_params = {}
+
+                if isinstance(params, dict):
+                    for param_name, param_spec in params.items():
+                        if isinstance(param_spec, dict):
+                            compact_params[param_name] = {
+                                "type": param_spec.get("type", "string"),
+                                "required": bool(param_spec.get("required", False)),
+                            }
+
+                compact_actions[action_name] = {
+                    "description": str(spec.get("description", ""))[:320],
+                    "parameters": compact_params,
+                }
+
+            compact[name] = {
+                "description": str(description.get("description", name))[:240],
+                "actions": compact_actions,
+            }
+
+        return compact
+
     def describe(self):
         out = {}
 

@@ -1,0 +1,18 @@
+FINAL KAREEM_AGENT PATCH
+
+This fixes the issue where simple folder/file commands were incorrectly sent to system.run_command.
+
+1. Stop the current agent with Ctrl+C.
+2. Copy the included files into:
+   C:\Users\Acer\KAREEM_AGENT
+   preserving the folders.
+3. Start:
+   .\.venv\Scripts\python.exe app.py
+
+The important files are:
+- core\runner.py
+- brain\planner.py
+
+This version gives ordinary filesystem commands deterministic priority, so:
+"اعمل فولدر على سطح المكتب اسمه KAREEM_TEST"
+will directly call filesystem.create_directory.

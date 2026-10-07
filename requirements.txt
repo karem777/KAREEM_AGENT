@@ -1,0 +1,10 @@
+Flask
+ollama
+psutil
+requests
+httpx
+beautifulsoup4
+pywinauto
+pyautogui
+pygetwindow
+Pillow

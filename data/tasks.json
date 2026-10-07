@@ -1,0 +1,2028 @@
+[
+  {
+    "id": 1,
+    "goal": "KAREEM AGENT test task",
+    "status": "active",
+    "created_at": "2026-10-01T08:34:27.915775",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 2,
+    "goal": "اعمل نظام بسيط للعملاء: اعمل فولدر clients، واعمل ملف README.txt جواه يشرح إن المجلد ده مخصص لبيانات العملاء، وبعدها اعرضلي محتويات المجلد.",
+    "status": "completed",
+    "created_at": "2026-10-01T08:35:49.372866",
+    "steps": [
+      {
+        "action": "filesystem.create_directory",
+        "result": {
+          "success": true,
+          "result": "Directory created: clients"
+        },
+        "time": "2026-10-01T08:36:03.241469"
+      },
+      {
+        "action": "filesystem.write_file",
+        "result": {
+          "success": true,
+          "result": "File written: clients\\README.txt"
+        },
+        "time": "2026-10-01T08:36:10.206120"
+      },
+      {
+        "action": "filesystem.list_directory",
+        "result": {
+          "success": true,
+          "result": [
+            {
+              "name": "ahmed.txt",
+              "type": "FILE"
+            },
+            {
+              "name": "README.txt",
+              "type": "FILE"
+            }
+          ]
+        },
+        "time": "2026-10-01T08:36:15.511041"
+      }
+    ],
+    "reflection": [
+      {
+        "text": "Action filesystem.create_directory completed successfully. Continue from the new state.",
+        "time": "2026-10-01T08:36:03.255585"
+      },
+      {
+        "text": "Action filesystem.write_file completed successfully. Continue from the new state.",
+        "time": "2026-10-01T08:36:10.220976"
+      },
+      {
+        "text": "Action filesystem.list_directory completed successfully. Continue from the new state.",
+        "time": "2026-10-01T08:36:15.522658"
+      },
+      {
+        "text": "Task completed successfully.",
+        "time": "2026-10-01T08:36:21.941922"
+      }
+    ],
+    "completed_at": "2026-10-01T08:36:21.956878"
+  },
+  {
+    "id": 3,
+    "goal": "اكتبيلي جمله ترحيب بالعربي",
+    "status": "completed",
+    "created_at": "2026-10-01T08:45:18.468153",
+    "steps": [],
+    "reflection": [
+      {
+        "text": "Task completed successfully.",
+        "time": "2026-10-01T08:45:33.434017"
+      }
+    ],
+    "completed_at": "2026-10-01T08:45:33.451323"
+  },
+  {
+    "id": 4,
+    "goal": "ازيك يا كريم",
+    "status": "completed",
+    "created_at": "2026-10-01T08:56:12.143968",
+    "steps": [],
+    "reflection": [
+      {
+        "text": "Task completed successfully.",
+        "time": "2026-10-01T08:56:27.794968"
+      }
+    ],
+    "completed_at": "2026-10-01T08:56:27.809721"
+  },
+  {
+    "id": 5,
+    "goal": "احفظ اسمي كريم",
+    "status": "completed",
+    "created_at": "2026-10-01T09:01:57.664030",
+    "steps": [],
+    "reflection": [
+      {
+        "text": "Task completed successfully.",
+        "time": "2026-10-01T09:02:10.793592"
+      }
+    ],
+    "completed_at": "2026-10-01T09:02:10.811506"
+  },
+  {
+    "id": 6,
+    "goal": "اسمي كريم",
+    "status": "completed",
+    "created_at": "2026-10-01T09:04:25.913203",
+    "steps": [
+      {
+        "action": "memory.set",
+        "result": {
+          "success": true,
+          "result": {
+            "success": true,
+            "key": "name",
+            "value": "كريم"
+          }
+        },
+        "time": "2026-10-01T09:04:33.294066"
+      }
+    ],
+    "reflection": [
+      {
+        "text": "Action memory.set completed successfully. Continue from the new state.",
+        "time": "2026-10-01T09:04:33.307803"
+      },
+      {
+        "text": "Task completed successfully.",
+        "time": "2026-10-01T09:04:36.577590"
+      }
+    ],
+    "completed_at": "2026-10-01T09:04:36.593204"
+  },
+  {
+    "id": 7,
+    "goal": "اسمي ايه",
+    "status": "completed",
+    "created_at": "2026-10-01T09:04:50.920387",
+    "steps": [
+      {
+        "action": "memory.get",
+        "result": {
+          "success": true,
+          "result": {
+            "success": true,
+            "key": "name",
+            "value": "كريم"
+          }
+        },
+        "time": "2026-10-01T09:04:56.183652"
+      }
+    ],
+    "reflection": [
+      {
+        "text": "Action memory.get completed successfully. Continue from the new state.",
+        "time": "2026-10-01T09:04:56.211079"
+      },
+      {
+        "text": "Task completed successfully.",
+        "time": "2026-10-01T09:04:58.526186"
+      }
+    ],
+    "completed_at": "2026-10-01T09:04:58.541557"
+  },
+  {
+    "id": 8,
+    "goal": "اسمي ايه",
+    "status": "completed",
+    "created_at": "2026-10-01T09:07:15.908787",
+    "steps": [
+      {
+        "action": "memory.get",
+        "result": {
+          "success": true,
+          "result": {
+            "success": true,
+            "key": "name",
+            "value": "كريم"
+          }
+        },
+        "time": "2026-10-01T09:07:21.220269"
+      }
+    ],
+    "reflection": [
+      {
+        "text": "Action memory.get completed successfully. Continue from the new state.",
+        "time": "2026-10-01T09:07:21.237306"
+      },
+      {
+        "text": "Task completed successfully.",
+        "time": "2026-10-01T09:07:23.576635"
+      }
+    ],
+    "completed_at": "2026-10-01T09:07:23.592901"
+  },
+  {
+    "id": 9,
+    "goal": "اسمي اي",
+    "status": "completed",
+    "created_at": "2026-10-01T09:09:26.539542",
+    "steps": [
+      {
+        "action": "memory.set",
+        "result": {
+          "success": true,
+          "result": {
+            "success": true,
+            "key": "user_name",
+            "value": "اي"
+          }
+        },
+        "time": "2026-10-01T09:09:32.920290"
+      }
+    ],
+    "reflection": [
+      {
+        "text": "Action memory.set completed successfully. Continue from the new state.",
+        "time": "2026-10-01T09:09:32.935985"
+      },
+      {
+        "text": "Task completed successfully.",
+        "time": "2026-10-01T09:09:35.573950"
+      }
+    ],
+    "completed_at": "2026-10-01T09:09:35.590588"
+  },
+  {
+    "id": 10,
+    "goal": "ابحث على الإنترنت عن آخر أخبار OpenAI",
+    "status": "completed",
+    "created_at": "2026-10-01T09:17:07.241619",
+    "steps": [
+      {
+        "action": "web.search",
+        "result": {
+          "success": true,
+          "result": {
+            "success": true,
+            "results": [
+              {
+                "title": "أخبار OpenAI | الشرق للأخبار - Asharq",
+                "href": "https://asharq.com/tags/openai/",
+                "body": "آخر الأخبار والتطورات من \"الشرق\" عن OpenAI الشركة الأميركية الناشئة مطورة روبوت المحادثة \"ChatGPT\" ونظام \"DALL·E 2\" الذي يحول الجمل المكتوبة إلى صور"
+              },
+              {
+                "title": "OpenAI | الأبحاث والنشر",
+                "href": "https://openai.com/ar/",
+                "body": "OpenAI DevDay [2026] شاهد الكلمة الرئيسية للتعرّف على أحدث مستجدات ChatGPT وCodex والأدوات التي يستخدمها المطوّرون لبناء تطبيقاتهم باستخدام OpenAI."
+              },
+              {
+                "title": "\"OpenAI\" توقف تدريب أقوى نماذجها بعد هروب بعضها من بيئة معزولة",
+                "href": "https://www.alarabiya.net/technology/ai/2026/09/28/openai-توقف-تدريب-اقوى-نماذجها-بعد-هروب-بعضها-من-بيئة-معزولة",
+                "body": "أعلنت شركة OpenAI تعليق تدريب أقوى نماذج الذكاء الاصطناعي التابعة لها، بعد أن تمكن نموذج بحثي من الخروج من بيئة تدريب مقيدة، في حادثة فشل خلالها نظام"
+              },
+              {
+                "title": "OpenAI News | Today's Latest Stories | Reuters",
+                "href": "https://www.reuters.com/technology/openai/",
+                "body": "OpenAI's models accessed publicly available information from US government websites, including those of the Census Bureau and the Securities and Exchange Commission, Bloomberg News reported on ..."
+              },
+              {
+                "title": "لماذا ألغت OpenAI تحديث ChatGPT الضخم ... - i24NEWS",
+                "href": "https://www.i24news.tv/ar/أخبار/التكنولوجيا/artc-9cd54210",
+                "body": "أعلنت شركة OpenAI، المطورة لـ ChatGPT، عن إلغاء إطلاق نموذج الذكاء الاصطناعي الجديد لها، GPT-6.1 Astra، وذلك عقب سلسلة ..."
+              }
+            ]
+          }
+        },
+        "time": "2026-10-01T09:17:35.118308"
+      }
+    ],
+    "reflection": [
+      {
+        "text": "Action web.search completed successfully. Continue from the new state.",
+        "time": "2026-10-01T09:17:35.142077"
+      },
+      {
+        "text": "Task completed successfully.",
+        "time": "2026-10-01T09:19:48.867906"
+      }
+    ],
+    "completed_at": "2026-10-01T09:19:48.896738"
+  },
+  {
+    "id": 11,
+    "goal": "ازيك",
+    "status": "completed",
+    "created_at": "2026-10-01T09:26:23.314532",
+    "steps": [],
+    "reflection": [
+      {
+        "text": "Task completed successfully.",
+        "time": "2026-10-01T09:26:39.584983"
+      }
+    ],
+    "completed_at": "2026-10-01T09:26:39.602882"
+  },
+  {
+    "id": 12,
+    "goal": "اسمي كريم وليس اي",
+    "status": "completed",
+    "created_at": "2026-10-01T09:26:52.043445",
+    "steps": [],
+    "reflection": [
+      {
+        "text": "Task completed successfully.",
+        "time": "2026-10-01T09:26:54.728462"
+      }
+    ],
+    "completed_at": "2026-10-01T09:26:54.747052"
+  },
+  {
+    "id": 13,
+    "goal": "اسمي ايه",
+    "status": "completed",
+    "created_at": "2026-10-01T09:27:06.067425",
+    "steps": [],
+    "reflection": [
+      {
+        "text": "Task completed successfully.",
+        "time": "2026-10-01T09:27:09.016727"
+      }
+    ],
+    "completed_at": "2026-10-01T09:27:09.034899"
+  },
+  {
+    "id": 14,
+    "goal": "اسمي انا ايه",
+    "status": "completed",
+    "created_at": "2026-10-01T09:27:17.754430",
+    "steps": [],
+    "reflection": [
+      {
+        "text": "Task completed successfully.",
+        "time": "2026-10-01T09:27:20.685674"
+      }
+    ],
+    "completed_at": "2026-10-01T09:27:20.702148"
+  },
+  {
+    "id": 15,
+    "goal": "اسمك هيكون بدر",
+    "status": "completed",
+    "created_at": "2026-10-01T09:28:38.289346",
+    "steps": [],
+    "reflection": [
+      {
+        "text": "Task completed successfully.",
+        "time": "2026-10-01T09:28:40.679886"
+      }
+    ],
+    "completed_at": "2026-10-01T09:28:40.699589"
+  },
+  {
+    "id": 16,
+    "goal": "اسمي انا ايه",
+    "status": "completed",
+    "created_at": "2026-10-01T09:28:48.062268",
+    "steps": [],
+    "reflection": [
+      {
+        "text": "Task completed successfully.",
+        "time": "2026-10-01T09:28:51.168359"
+      }
+    ],
+    "completed_at": "2026-10-01T09:28:51.187228"
+  },
+  {
+    "id": 17,
+    "goal": "وانت اسمك ايه",
+    "status": "completed",
+    "created_at": "2026-10-01T09:28:59.772740",
+    "steps": [],
+    "reflection": [
+      {
+        "text": "Task completed successfully.",
+        "time": "2026-10-01T09:29:02.174673"
+      }
+    ],
+    "completed_at": "2026-10-01T09:29:02.189673"
+  },
+  {
+    "id": 18,
+    "goal": "اسمي كريم",
+    "status": "completed",
+    "created_at": "2026-10-01T18:37:57.508974",
+    "steps": [
+      {
+        "action": "memory.set",
+        "result": {
+          "success": true,
+          "result": {
+            "success": true,
+            "key": "user_name",
+            "value": "كريم"
+          }
+        },
+        "time": "2026-10-01T18:38:41.919936"
+      }
+    ],
+    "reflection": [
+      {
+        "text": "Action memory.set completed successfully. Continue from the new state.",
+        "time": "2026-10-01T18:38:41.936138"
+      },
+      {
+        "text": "Task completed successfully.",
+        "time": "2026-10-01T18:39:02.784222"
+      }
+    ],
+    "completed_at": "2026-10-01T18:39:02.799777"
+  },
+  {
+    "id": 19,
+    "goal": "اسمي كريم",
+    "status": "completed",
+    "created_at": "2026-10-01T18:42:15.351393",
+    "steps": [],
+    "reflection": [
+      {
+        "text": "Task completed successfully.",
+        "time": "2026-10-01T18:42:30.892192"
+      }
+    ],
+    "completed_at": "2026-10-01T18:42:30.909659"
+  },
+  {
+    "id": 20,
+    "goal": "خوج",
+    "status": "active",
+    "created_at": "2026-10-01T18:44:21.253641",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 21,
+    "goal": "اسمي كريم",
+    "status": "active",
+    "created_at": "2026-10-01T18:45:25.730650",
+    "steps": [
+      {
+        "action": "memory.set",
+        "result": {
+          "success": true,
+          "result": {
+            "success": true,
+            "key": "name",
+            "value": "كريم"
+          }
+        },
+        "time": "2026-10-01T18:45:25.756450"
+      },
+      {
+        "action": "memory.set",
+        "result": {
+          "success": true,
+          "result": {
+            "success": true,
+            "key": "name",
+            "value": "كريم"
+          }
+        },
+        "time": "2026-10-01T18:45:25.789882"
+      },
+      {
+        "action": "memory.set",
+        "result": {
+          "success": true,
+          "result": {
+            "success": true,
+            "key": "name",
+            "value": "كريم"
+          }
+        },
+        "time": "2026-10-01T18:45:25.824562"
+      },
+      {
+        "action": "memory.set",
+        "result": {
+          "success": true,
+          "result": {
+            "success": true,
+            "key": "name",
+            "value": "كريم"
+          }
+        },
+        "time": "2026-10-01T18:45:25.860996"
+      },
+      {
+        "action": "memory.set",
+        "result": {
+          "success": true,
+          "result": {
+            "success": true,
+            "key": "name",
+            "value": "كريم"
+          }
+        },
+        "time": "2026-10-01T18:45:25.895619"
+      },
+      {
+        "action": "memory.set",
+        "result": {
+          "success": true,
+          "result": {
+            "success": true,
+            "key": "name",
+            "value": "كريم"
+          }
+        },
+        "time": "2026-10-01T18:45:25.929539"
+      },
+      {
+        "action": "memory.set",
+        "result": {
+          "success": true,
+          "result": {
+            "success": true,
+            "key": "name",
+            "value": "كريم"
+          }
+        },
+        "time": "2026-10-01T18:45:25.967819"
+      },
+      {
+        "action": "memory.set",
+        "result": {
+          "success": true,
+          "result": {
+            "success": true,
+            "key": "name",
+            "value": "كريم"
+          }
+        },
+        "time": "2026-10-01T18:45:26.002808"
+      }
+    ],
+    "reflection": [
+      {
+        "text": "Action memory.set completed successfully. Continue from the new state.",
+        "time": "2026-10-01T18:45:25.770915"
+      },
+      {
+        "text": "Action memory.set completed successfully. Continue from the new state.",
+        "time": "2026-10-01T18:45:25.803601"
+      },
+      {
+        "text": "Action memory.set completed successfully. Continue from the new state.",
+        "time": "2026-10-01T18:45:25.839382"
+      },
+      {
+        "text": "Action memory.set completed successfully. Continue from the new state.",
+        "time": "2026-10-01T18:45:25.876012"
+      },
+      {
+        "text": "Action memory.set completed successfully. Continue from the new state.",
+        "time": "2026-10-01T18:45:25.911737"
+      },
+      {
+        "text": "Action memory.set completed successfully. Continue from the new state.",
+        "time": "2026-10-01T18:45:25.946131"
+      },
+      {
+        "text": "Action memory.set completed successfully. Continue from the new state.",
+        "time": "2026-10-01T18:45:25.981579"
+      },
+      {
+        "text": "Action memory.set completed successfully. Continue from the new state.",
+        "time": "2026-10-01T18:45:26.019322"
+      },
+      {
+        "text": "Task stopped after 8 steps.",
+        "time": "2026-10-01T18:45:26.037596"
+      }
+    ]
+  },
+  {
+    "id": 22,
+    "goal": "اعمل فولدر test_project وجواه 3 ملفات: one.txt و two.txt و three.txt",
+    "status": "completed",
+    "created_at": "2026-10-01T18:52:27.334733",
+    "steps": [
+      {
+        "action": "filesystem.create_directory",
+        "result": {
+          "success": true,
+          "result": "Directory created: test_project"
+        },
+        "time": "2026-10-01T18:52:44.554029"
+      },
+      {
+        "action": "filesystem.write_file",
+        "result": {
+          "success": true,
+          "result": "File written: test_project\\one.txt"
+        },
+        "time": "2026-10-01T18:52:44.572445"
+      },
+      {
+        "action": "filesystem.write_file",
+        "result": {
+          "success": true,
+          "result": "File written: test_project\\two.txt"
+        },
+        "time": "2026-10-01T18:52:44.592241"
+      },
+      {
+        "action": "filesystem.write_file",
+        "result": {
+          "success": true,
+          "result": "File written: test_project\\three.txt"
+        },
+        "time": "2026-10-01T18:52:44.612275"
+      }
+    ],
+    "reflection": [
+      {
+        "text": "Step 1 completed successfully with 4 action(s). Continue to the next meaningful stage.",
+        "time": "2026-10-01T18:52:44.629662"
+      },
+      {
+        "text": "Task completed successfully.",
+        "time": "2026-10-01T18:52:48.956076"
+      }
+    ],
+    "completed_at": "2026-10-01T18:52:48.976830"
+  },
+  {
+    "id": 23,
+    "goal": "اعرفلي حالة الجهاز",
+    "status": "completed",
+    "created_at": "2026-10-01T19:05:42.615312",
+    "steps": [
+      {
+        "action": "system.status",
+        "result": {
+          "success": true,
+          "result": {
+            "cpu": {
+              "usage_percent": 19.8,
+              "cores": 6,
+              "logical_processors": 12,
+              "frequency_mhz": 2008.0
+            },
+            "memory": {
+              "total_gb": 15.31,
+              "used_gb": 12.57,
+              "available_gb": 2.74,
+              "usage_percent": 82.1
+            },
+            "disk": {
+              "total_gb": 475.42,
+              "used_gb": 422.5,
+              "free_gb": 52.92,
+              "usage_percent": 88.9
+            },
+            "network": {
+              "hostname": "karem",
+              "local_ip": "192.168.8.13",
+              "connections": 248
+            },
+            "operating_system": {
+              "system": "Windows",
+              "release": "11",
+              "version": "10.0.26200",
+              "machine": "AMD64",
+              "processor": "AMD64 Family 25 Model 68 Stepping 1, AuthenticAMD"
+            },
+            "top_processes": [
+              {
+                "pid": 110440,
+                "name": "llama-server.exe",
+                "cpu_percent": 0.0,
+                "memory_percent": 11.91
+              },
+              {
+                "pid": 4524,
+                "name": "MemCompression",
+                "cpu_percent": 0.0,
+                "memory_percent": 5.95
+              },
+              {
+                "pid": 39752,
+                "name": "chrome.exe",
+                "cpu_percent": 0.0,
+                "memory_percent": 4.79
+              },
+              {
+                "pid": 29316,
+                "name": "Discord.exe",
+                "cpu_percent": 0.0,
+                "memory_percent": 2.04
+              },
+              {
+                "pid": 7004,
+                "name": "MsMpEng.exe",
+                "cpu_percent": 0.0,
+                "memory_percent": 1.55
+              },
+              {
+                "pid": 104068,
+                "name": "explorer.exe",
+                "cpu_percent": 0.0,
+                "memory_percent": 1.45
+              },
+              {
+                "pid": 22956,
+                "name": "steam.exe",
+                "cpu_percent": 0.0,
+                "memory_percent": 1.26
+              },
+              {
+                "pid": 2100,
+                "name": "dwm.exe",
+                "cpu_percent": 0.0,
+                "memory_percent": 1.25
+              },
+              {
+                "pid": 105020,
+                "name": "TextInputHost.exe",
+                "cpu_percent": 0.0,
+                "memory_percent": 1.13
+              },
+              {
+                "pid": 41216,
+                "name": "EACefSubProcess.exe",
+                "cpu_percent": 0.0,
+                "memory_percent": 1.01
+              }
+            ]
+          }
+        },
+        "time": "2026-10-01T19:06:00.143173"
+      }
+    ],
+    "reflection": [
+      {
+        "text": "Action system.status completed successfully. Continue from the new state.",
+        "time": "2026-10-01T19:06:00.160843"
+      },
+      {
+        "text": "Task completed successfully.",
+        "time": "2026-10-01T19:07:37.082710"
+      }
+    ],
+    "completed_at": "2026-10-01T19:07:37.107970"
+  },
+  {
+    "id": 24,
+    "goal": "اعمل مشروع test_app، أنشئ داخله مجلدات src و data و docs، وأنشئ ملفات مناسبة داخلها، وبعدها اعرضلي حالة الجهاز وتأكد إن المشروع اتعمل بشكل صحيح.",
+    "status": "completed",
+    "created_at": "2026-10-01T19:21:33.918488",
+    "steps": [
+      {
+        "action": "filesystem.create_folder.create_folder",
+        "result": {
+          "success": false,
+          "error": "Tool not found: filesystem.create_folder"
+        },
+        "time": "2026-10-01T19:21:59.925604"
+      },
+      {
+        "action": "filesystem.create_folder.create_folder",
+        "result": {
+          "success": false,
+          "error": "Tool not found: filesystem.create_folder"
+        },
+        "time": "2026-10-01T19:21:59.945266"
+      },
+      {
+        "action": "filesystem.create_folder.create_folder",
+        "result": {
+          "success": false,
+          "error": "Tool not found: filesystem.create_folder"
+        },
+        "time": "2026-10-01T19:21:59.961690"
+      },
+      {
+        "action": "filesystem.create_folder.create_folder",
+        "result": {
+          "success": false,
+          "error": "Tool not found: filesystem.create_folder"
+        },
+        "time": "2026-10-01T19:21:59.977195"
+      }
+    ],
+    "reflection": [
+      {
+        "text": "The planning step completed with failures. Failed actions: filesystem.create_folder.create_folder, filesystem.create_folder.create_folder, filesystem.create_folder.create_folder, filesystem.create_folder.create_folder. The next planning cycle must analyze the errors and recover.",
+        "time": "2026-10-01T19:21:59.993393"
+      },
+      {
+        "text": "Task completed successfully.",
+        "time": "2026-10-01T19:22:04.474477"
+      }
+    ],
+    "completed_at": "2026-10-01T19:22:04.491187"
+  },
+  {
+    "id": 25,
+    "goal": "اعمل مشروع test_app، أنشئ داخله مجلدات src و data و docs، وأنشئ ملفات مناسبة\n داخلها، وبعدها اعرضلي حالة الجهاز وتأكد إن المشروع اتعمل بشكل",
+    "status": "active",
+    "created_at": "2026-10-01T19:27:05.916732",
+    "steps": [
+      {
+        "action": "create_folder.create_folder",
+        "result": {
+          "success": false,
+          "error": "Tool not found: create_folder. Available tools: ['filesystem', 'memory', 'web', 'system']"
+        },
+        "time": "2026-10-01T19:27:20.518524"
+      },
+      {
+        "action": "create_folder.create_folder",
+        "result": {
+          "success": false,
+          "error": "Tool not found: create_folder. Available tools: ['filesystem', 'memory', 'web', 'system']"
+        },
+        "time": "2026-10-01T19:27:20.537845"
+      },
+      {
+        "action": "create_folder.create_folder",
+        "result": {
+          "success": false,
+          "error": "Tool not found: create_folder. Available tools: ['filesystem', 'memory', 'web', 'system']"
+        },
+        "time": "2026-10-01T19:27:20.555869"
+      },
+      {
+        "action": "create_folder.create_folder",
+        "result": {
+          "success": false,
+          "error": "Tool not found: create_folder. Available tools: ['filesystem', 'memory', 'web', 'system']"
+        },
+        "time": "2026-10-01T19:27:20.573709"
+      }
+    ],
+    "reflection": [
+      {
+        "text": "Some actions failed. Do not declare the task complete. Analyze the errors and recover. Failures: [{\"action\": \"create_folder.create_folder\", \"error\": \"Tool not found: create_folder. Available tools: ['filesystem', 'memory', 'web', 'system']\"}, {\"action\": \"create_folder.create_folder\", \"error\": \"Tool not found: create_folder. Available tools: ['filesystem', 'memory', 'web', 'system']\"}, {\"action\": \"create_folder.create_folder\", \"error\": \"Tool not found: create_folder. Available tools: ['filesystem', 'memory', 'web', 'system']\"}, {\"action\": \"create_folder.create_folder\", \"error\": \"Tool not found: create_folder. Available tools: ['filesystem', 'memory', 'web', 'system']\"}]",
+        "time": "2026-10-01T19:27:20.589811"
+      },
+      {
+        "text": "Planner returned a tool-like response as chat before completing the task.",
+        "time": "2026-10-01T19:27:34.239581"
+      },
+      {
+        "text": "Planner returned a tool-like response as chat before completing the task.",
+        "time": "2026-10-01T19:27:42.169896"
+      },
+      {
+        "text": "Planner returned a tool-like response as chat before completing the task.",
+        "time": "2026-10-01T19:27:50.089438"
+      },
+      {
+        "text": "Planner returned a tool-like response as chat before completing the task.",
+        "time": "2026-10-01T19:27:57.985979"
+      },
+      {
+        "text": "Planner returned a tool-like response as chat before completing the task.",
+        "time": "2026-10-01T19:28:05.938472"
+      },
+      {
+        "text": "Planner returned a tool-like response as chat before completing the task.",
+        "time": "2026-10-01T19:28:13.852381"
+      },
+      {
+        "text": "Planner returned a tool-like response as chat before completing the task.",
+        "time": "2026-10-01T19:28:21.890575"
+      },
+      {
+        "text": "Planner returned a tool-like response as chat before completing the task.",
+        "time": "2026-10-01T19:28:29.772838"
+      },
+      {
+        "text": "Planner returned a tool-like response as chat before completing the task.",
+        "time": "2026-10-01T19:28:37.685554"
+      },
+      {
+        "text": "Planner returned a tool-like response as chat before completing the task.",
+        "time": "2026-10-01T19:28:42.458540"
+      },
+      {
+        "text": "Planner returned a tool-like response as chat before completing the task.",
+        "time": "2026-10-01T19:28:47.330827"
+      },
+      {
+        "text": "Planner returned a tool-like response as chat before completing the task.",
+        "time": "2026-10-01T19:28:52.194827"
+      },
+      {
+        "text": "Planner returned a tool-like response as chat before completing the task.",
+        "time": "2026-10-01T19:28:56.487419"
+      },
+      {
+        "text": "Planner returned a tool-like response as chat before completing the task.",
+        "time": "2026-10-01T19:29:01.418456"
+      },
+      {
+        "text": "Planner returned a tool-like response as chat before completing the task.",
+        "time": "2026-10-01T19:29:06.315911"
+      },
+      {
+        "text": "Planner returned a tool-like response as chat before completing the task.",
+        "time": "2026-10-01T19:29:11.200733"
+      },
+      {
+        "text": "Planner returned a tool-like response as chat before completing the task.",
+        "time": "2026-10-01T19:29:16.204851"
+      },
+      {
+        "text": "Planner returned a tool-like response as chat before completing the task.",
+        "time": "2026-10-01T19:29:21.321665"
+      },
+      {
+        "text": "Planner returned a tool-like response as chat before completing the task.",
+        "time": "2026-10-01T19:29:26.310299"
+      },
+      {
+        "text": "Task stopped after 20 planning steps.",
+        "time": "2026-10-01T19:29:26.328825"
+      }
+    ]
+  },
+  {
+    "id": 26,
+    "goal": "اعمل مشروع test_app، أنشئ داخله مجلدات src و data و docs، وأنشئ ملفات مناسب\nة\n داخلها، وبعدها اعرضلي حالة الجهاز وتأكد إن المشروع اتعمل اعمل مشروع test_app، أنشئ داخله مجلدات src و data و docs، وأنشئ ملفات مناسب\nة\n داخلها، وبعدها اعرضلي حالة الجهاز وتأكد إن المشروع اتعمل",
+    "status": "active",
+    "created_at": "2026-10-01T19:32:58.715693",
+    "steps": [
+      {
+        "action": "filesystem.create_directory",
+        "result": {
+          "success": true,
+          "result": "Directory created: test_app"
+        },
+        "time": "2026-10-01T19:33:13.716367"
+      },
+      {
+        "action": "filesystem.create_directory",
+        "result": {
+          "success": true,
+          "result": "Directory created: test_app\\src"
+        },
+        "time": "2026-10-01T19:33:13.737015"
+      },
+      {
+        "action": "filesystem.create_directory",
+        "result": {
+          "success": true,
+          "result": "Directory created: test_app\\data"
+        },
+        "time": "2026-10-01T19:33:13.757314"
+      },
+      {
+        "action": "filesystem.create_directory",
+        "result": {
+          "success": true,
+          "result": "Directory created: test_app\\docs"
+        },
+        "time": "2026-10-01T19:33:13.777762"
+      }
+    ],
+    "reflection": [
+      {
+        "text": "Planning stage 1 completed with 4 action(s). Continue toward the user's actual goal.",
+        "time": "2026-10-01T19:33:13.791771"
+      },
+      {
+        "text": "Invalid planner output: {\"role\": \"tool\", \"tool\": \"filesystem\", \"action\": \"create_file\", \"arguments\": {\"path\": \"test_app/src/main.py\", \"content\": \"print(\\\"Hello from src!\\\")\"}}",
+        "time": "2026-10-01T19:33:18.695908"
+      },
+      {
+        "text": "Invalid planner output: {\"role\": \"tool\", \"tool\": \"filesystem\", \"action\": \"write_file\", \"arguments\": {\"path\": \"test_app/src/main.py\", \"content\": \"print(\\\"Hello from src!\\\")\"}}",
+        "time": "2026-10-01T19:33:23.611951"
+      },
+      {
+        "text": "Invalid planner output: {\"role\": \"tool\", \"tool\": \"filesystem\", \"action\": \"write_file\", \"arguments\": {\"path\": \"test_app/src/main.py\", \"content\": \"print(\\\"Hello from src!\\\")\"}}",
+        "time": "2026-10-01T19:33:28.591801"
+      },
+      {
+        "text": "Invalid planner output: {\"role\": \"tool\", \"tool\": \"filesystem\", \"action\": \"write_file\", \"arguments\": {\"path\": \"test_app/src/main.py\", \"content\": \"print(\\\"Hello from src!\\\")\"}}",
+        "time": "2026-10-01T19:33:33.527772"
+      },
+      {
+        "text": "Invalid planner output: {\"role\": \"tool\", \"tool\": \"filesystem\", \"action\": \"write_file\", \"arguments\": {\"path\": \"test_app/src/main.py\", \"content\": \"print(\\\"Hello from src!\\\")\"}}",
+        "time": "2026-10-01T19:33:38.560769"
+      },
+      {
+        "text": "Invalid planner output: {\"role\": \"tool\", \"tool\": \"filesystem\", \"action\": \"write_file\", \"arguments\": {\"path\": \"test_app/src/main.py\", \"content\": \"print(\\\"Hello from src!\\\")\"}}",
+        "time": "2026-10-01T19:33:44.841352"
+      },
+      {
+        "text": "Invalid planner output: {\"role\": \"tool\", \"tool\": \"filesystem\", \"action\": \"write_file\", \"arguments\": {\"path\": \"test_app/src/main.py\", \"content\": \"print(\\\"Hello from src!\\\")\"}}",
+        "time": "2026-10-01T19:33:49.824669"
+      },
+      {
+        "text": "Invalid planner output: {\"role\": \"tool\", \"tool\": \"filesystem\", \"action\": \"write_file\", \"arguments\": {\"path\": \"test_app/src/main.py\", \"content\": \"print(\\\"Hello from src!\\\")\"}}",
+        "time": "2026-10-01T19:33:54.807150"
+      },
+      {
+        "text": "Invalid planner output: {\"role\": \"tool\", \"tool\": \"filesystem\", \"action\": \"write_file\", \"arguments\": {\"path\": \"test_app/src/main.py\", \"content\": \"print(\\\"Hello from src!\\\")\"}}",
+        "time": "2026-10-01T19:33:59.848624"
+      },
+      {
+        "text": "Invalid planner output: {\"role\": \"tool\", \"tool\": \"filesystem\", \"action\": \"write_file\", \"arguments\": {\"path\": \"test_app/src/main.py\", \"content\": \"print(\\\"Hello from src!\\\")\"}}",
+        "time": "2026-10-01T19:34:04.680624"
+      },
+      {
+        "text": "Invalid planner output: {\"role\": \"tool\", \"tool\": \"filesystem\", \"action\": \"write_file\", \"arguments\": {\"path\": \"test_app/src/main.py\", \"content\": \"print(\\\"Hello from src!\\\")\"}}",
+        "time": "2026-10-01T19:34:09.510913"
+      },
+      {
+        "text": "Planner output was not an executable action. The next cycle must return a real tool call.",
+        "time": "2026-10-01T19:34:14.472013"
+      },
+      {
+        "text": "Invalid planner output: {\"role\": \"tool\", \"tool\": \"filesystem\", \"action\": \"execute_file\", \"arguments\": {\"path\": \"test_app/src/main.py\"}}",
+        "time": "2026-10-01T19:34:18.461969"
+      },
+      {
+        "text": "Invalid planner output: {\"role\": \"tool\", \"tool\": \"filesystem\", \"action\": \"execute_file\", \"arguments\": {\"path\": \"test_app/src/main.py\"}}",
+        "time": "2026-10-01T19:34:22.345884"
+      },
+      {
+        "text": "Invalid planner output: {\"role\": \"tool\", \"tool\": \"filesystem\", \"action\": \"execute_file\", \"arguments\": {\"path\": \"test_app/src/main.py\"}}",
+        "time": "2026-10-01T19:34:26.166415"
+      },
+      {
+        "text": "Invalid planner output: {\"role\": \"tool\", \"tool\": \"filesystem\", \"action\": \"execute_file\", \"arguments\": {\"path\": \"test_app/src/main.py\"}}",
+        "time": "2026-10-01T19:34:30.017157"
+      },
+      {
+        "text": "Invalid planner output: {\"role\": \"tool\", \"tool\": \"filesystem\", \"action\": \"execute_file\", \"arguments\": {\"path\": \"test_app/src/main.py\"}}",
+        "time": "2026-10-01T19:34:33.861470"
+      },
+      {
+        "text": "Invalid planner output: {\"role\": \"tool\", \"tool\": \"filesystem\", \"action\": \"execute_file\", \"arguments\": {\"path\": \"test_app/src/main.py\"}}",
+        "time": "2026-10-01T19:34:37.706237"
+      },
+      {
+        "text": "Invalid planner output: {\"role\": \"tool\", \"tool\": \"filesystem\", \"action\": \"execute_file\", \"arguments\": {\"path\": \"test_app/src/main.py\"}}",
+        "time": "2026-10-01T19:34:41.530468"
+      },
+      {
+        "text": "Task stopped after 20 planning steps.",
+        "time": "2026-10-01T19:34:41.551640"
+      }
+    ]
+  },
+  {
+    "id": 27,
+    "goal": "اعمل فولدر اسمه test2",
+    "status": "completed",
+    "created_at": "2026-10-01T19:39:19.375943",
+    "steps": [
+      {
+        "action": "filesystem.create_directory",
+        "result": {
+          "success": true,
+          "result": "Directory created: test2"
+        },
+        "time": "2026-10-01T19:39:26.659471"
+      }
+    ],
+    "reflection": [
+      {
+        "text": "Planning stage 1 completed with 1 action(s). Continue toward the user's actual goal.",
+        "time": "2026-10-01T19:39:26.679220"
+      },
+      {
+        "text": "Task completed successfully.",
+        "time": "2026-10-01T19:39:30.380096"
+      }
+    ],
+    "completed_at": "2026-10-01T19:39:30.401832"
+  },
+  {
+    "id": 28,
+    "goal": "اهلا",
+    "status": "completed",
+    "created_at": "2026-10-01T21:04:51.591232",
+    "steps": [],
+    "reflection": [
+      {
+        "text": "Task completed successfully.",
+        "time": "2026-10-01T21:05:12.742198"
+      }
+    ],
+    "completed_at": "2026-10-01T21:05:12.758603"
+  },
+  {
+    "id": 29,
+    "goal": "اعمل فولدر اسمه test3",
+    "status": "completed",
+    "created_at": "2026-10-01T21:08:43.372513",
+    "steps": [
+      {
+        "action": "filesystem.create_directory",
+        "result": {
+          "success": true,
+          "result": "Directory created: test3"
+        },
+        "time": "2026-10-01T21:08:51.399191"
+      }
+    ],
+    "reflection": [
+      {
+        "text": "Planning stage 1 completed with 1 action(s). Continue toward the user's actual goal.",
+        "time": "2026-10-01T21:08:51.416802"
+      },
+      {
+        "text": "Task completed successfully.",
+        "time": "2026-10-01T21:08:54.576429"
+      }
+    ],
+    "completed_at": "2026-10-01T21:08:54.593492"
+  },
+  {
+    "id": 30,
+    "goal": "اعمل فولدر اسمه test3",
+    "status": "active",
+    "created_at": "2026-10-01T21:25:17.298313",
+    "steps": [],
+    "reflection": [
+      {
+        "text": "Invalid planner output: {\"type\": \"invalid\", \"content\": \"No valid tool calls.\"}",
+        "time": "2026-10-01T21:25:32.035747"
+      },
+      {
+        "text": "Invalid planner output: {\"type\": \"invalid\", \"content\": \"No valid tool calls.\"}",
+        "time": "2026-10-01T21:25:37.888807"
+      },
+      {
+        "text": "Invalid planner output: {\"type\": \"invalid\", \"content\": \"No valid tool calls.\"}",
+        "time": "2026-10-01T21:25:43.723839"
+      },
+      {
+        "text": "Invalid planner output: {\"type\": \"invalid\", \"content\": \"No valid tool calls.\"}",
+        "time": "2026-10-01T21:25:49.762647"
+      },
+      {
+        "text": "Invalid planner output: {\"type\": \"invalid\", \"content\": \"No valid tool calls.\"}",
+        "time": "2026-10-01T21:25:55.595990"
+      },
+      {
+        "text": "Invalid planner output: {\"type\": \"invalid\", \"content\": \"No valid tool calls.\"}",
+        "time": "2026-10-01T21:26:01.579196"
+      },
+      {
+        "text": "Invalid planner output: {\"type\": \"invalid\", \"content\": \"No valid tool calls.\"}",
+        "time": "2026-10-01T21:26:05.497530"
+      },
+      {
+        "text": "Invalid planner output: {\"type\": \"invalid\", \"content\": \"No valid tool calls.\"}",
+        "time": "2026-10-01T21:26:10.889018"
+      },
+      {
+        "text": "Invalid planner output: {\"type\": \"invalid\", \"content\": \"No valid tool calls.\"}",
+        "time": "2026-10-01T21:26:16.366535"
+      },
+      {
+        "text": "Invalid planner output: {\"type\": \"invalid\", \"content\": \"No valid tool calls.\"}",
+        "time": "2026-10-01T21:26:21.701489"
+      },
+      {
+        "text": "Invalid planner output: {\"type\": \"invalid\", \"content\": \"No valid tool calls.\"}",
+        "time": "2026-10-01T21:26:27.139337"
+      },
+      {
+        "text": "Invalid planner output: {\"type\": \"invalid\", \"content\": \"No valid tool calls.\"}",
+        "time": "2026-10-01T21:26:32.627707"
+      },
+      {
+        "text": "Invalid planner output: {\"type\": \"invalid\", \"content\": \"No valid tool calls.\"}",
+        "time": "2026-10-01T21:26:37.918027"
+      },
+      {
+        "text": "Invalid planner output: {\"type\": \"invalid\", \"content\": \"No valid tool calls.\"}",
+        "time": "2026-10-01T21:26:43.362908"
+      },
+      {
+        "text": "Invalid planner output: {\"type\": \"invalid\", \"content\": \"No valid tool calls.\"}",
+        "time": "2026-10-01T21:26:48.813374"
+      },
+      {
+        "text": "Invalid planner output: {\"type\": \"invalid\", \"content\": \"No valid tool calls.\"}",
+        "time": "2026-10-01T21:26:54.228263"
+      },
+      {
+        "text": "Invalid planner output: {\"type\": \"invalid\", \"content\": \"No valid tool calls.\"}",
+        "time": "2026-10-01T21:26:59.708844"
+      },
+      {
+        "text": "Invalid planner output: {\"type\": \"invalid\", \"content\": \"No valid tool calls.\"}",
+        "time": "2026-10-01T21:27:05.179318"
+      },
+      {
+        "text": "Invalid planner output: {\"type\": \"invalid\", \"content\": \"No valid tool calls.\"}",
+        "time": "2026-10-01T21:27:10.633581"
+      },
+      {
+        "text": "Invalid planner output: {\"type\": \"invalid\", \"content\": \"No valid tool calls.\"}",
+        "time": "2026-10-01T21:27:15.857012"
+      },
+      {
+        "text": "Task stopped after 20 planning steps.",
+        "time": "2026-10-01T21:27:15.874521"
+      }
+    ]
+  },
+  {
+    "id": 31,
+    "goal": "اهلا",
+    "status": "completed",
+    "created_at": "2026-10-02T06:50:11.234806",
+    "steps": [],
+    "reflection": [
+      {
+        "text": "Task completed successfully.",
+        "time": "2026-10-02T06:50:25.963271"
+      }
+    ],
+    "completed_at": "2026-10-02T06:50:25.988514"
+  },
+  {
+    "id": 32,
+    "goal": "اعملي ملف وخليه على سطح المكتب وخلي اسمه kareem",
+    "status": "completed",
+    "created_at": "2026-10-02T06:50:52.640619",
+    "steps": [],
+    "reflection": [
+      {
+        "text": "Invalid planner output: {\"type\": \"invalid\", \"content\": \"No valid tool calls.\"}",
+        "time": "2026-10-02T06:51:00.209232"
+      },
+      {
+        "text": "Invalid planner output: {\"type\": \"invalid\", \"content\": \"No valid tool calls.\"}",
+        "time": "2026-10-02T06:51:06.897002"
+      },
+      {
+        "text": "Invalid planner output: {\"type\": \"invalid\", \"content\": \"No valid tool calls.\"}",
+        "time": "2026-10-02T06:51:14.125927"
+      },
+      {
+        "text": "Invalid planner output: {\"type\": \"invalid\", \"content\": \"No valid tool calls.\"}",
+        "time": "2026-10-02T06:51:21.857753"
+      },
+      {
+        "text": "Invalid planner output: {\"type\": \"invalid\", \"content\": \"No valid tool calls.\"}",
+        "time": "2026-10-02T06:51:28.686296"
+      },
+      {
+        "text": "Task completed successfully.",
+        "time": "2026-10-02T06:51:32.955392"
+      }
+    ],
+    "completed_at": "2026-10-02T06:51:32.989986"
+  },
+  {
+    "id": 33,
+    "goal": "لي بتقول تم وانت معملتش كده",
+    "status": "completed",
+    "created_at": "2026-10-02T06:53:37.136760",
+    "steps": [],
+    "reflection": [
+      {
+        "text": "Task completed successfully.",
+        "time": "2026-10-02T06:53:40.847731"
+      }
+    ],
+    "completed_at": "2026-10-02T06:53:40.872094"
+  },
+  {
+    "id": 34,
+    "goal": "اعمل فولدر اسمه test5",
+    "status": "active",
+    "created_at": "2026-10-02T06:59:41.076304",
+    "steps": [],
+    "reflection": [
+      {
+        "text": "Invalid planner output: {\"type\": \"invalid\", \"content\": \"No valid tool calls.\"}",
+        "time": "2026-10-02T06:59:46.611389"
+      },
+      {
+        "text": "Invalid planner output: {\"type\": \"invalid\", \"content\": \"No valid tool calls.\"}",
+        "time": "2026-10-02T06:59:52.111222"
+      },
+      {
+        "text": "Invalid planner output: {\"type\": \"invalid\", \"content\": \"No valid tool calls.\"}",
+        "time": "2026-10-02T06:59:57.460464"
+      },
+      {
+        "text": "Invalid planner output: {\"type\": \"invalid\", \"content\": \"No valid tool calls.\"}",
+        "time": "2026-10-02T07:00:02.816194"
+      },
+      {
+        "text": "Invalid planner output: {\"type\": \"invalid\", \"content\": \"No valid tool calls.\"}",
+        "time": "2026-10-02T07:00:07.697441"
+      },
+      {
+        "text": "Invalid planner output: {\"type\": \"invalid\", \"content\": \"No valid tool calls.\"}",
+        "time": "2026-10-02T07:00:12.548695"
+      },
+      {
+        "text": "Invalid planner output: {\"type\": \"invalid\", \"content\": \"No valid tool calls.\"}",
+        "time": "2026-10-02T07:00:17.400906"
+      },
+      {
+        "text": "Invalid planner output: {\"type\": \"invalid\", \"content\": \"No valid tool calls.\"}",
+        "time": "2026-10-02T07:00:22.249973"
+      },
+      {
+        "text": "Invalid planner output: {\"type\": \"invalid\", \"content\": \"No valid tool calls.\"}",
+        "time": "2026-10-02T07:00:27.238321"
+      },
+      {
+        "text": "Invalid planner output: {\"type\": \"invalid\", \"content\": \"No valid tool calls.\"}",
+        "time": "2026-10-02T07:00:32.095749"
+      },
+      {
+        "text": "Invalid planner output: {\"type\": \"invalid\", \"content\": \"No valid tool calls.\"}",
+        "time": "2026-10-02T07:00:36.947185"
+      },
+      {
+        "text": "Invalid planner output: {\"type\": \"invalid\", \"content\": \"No valid tool calls.\"}",
+        "time": "2026-10-02T07:00:41.836411"
+      },
+      {
+        "text": "Invalid planner output: {\"type\": \"invalid\", \"content\": \"No valid tool calls.\"}",
+        "time": "2026-10-02T07:00:46.697837"
+      },
+      {
+        "text": "Invalid planner output: {\"type\": \"invalid\", \"content\": \"No valid tool calls.\"}",
+        "time": "2026-10-02T07:00:51.573310"
+      },
+      {
+        "text": "Invalid planner output: {\"type\": \"invalid\", \"content\": \"No valid tool calls.\"}",
+        "time": "2026-10-02T07:00:56.461154"
+      },
+      {
+        "text": "Invalid planner output: {\"type\": \"invalid\", \"content\": \"No valid tool calls.\"}",
+        "time": "2026-10-02T07:01:01.330731"
+      },
+      {
+        "text": "Invalid planner output: {\"type\": \"invalid\", \"content\": \"No valid tool calls.\"}",
+        "time": "2026-10-02T07:01:06.172428"
+      },
+      {
+        "text": "Invalid planner output: {\"type\": \"invalid\", \"content\": \"No valid tool calls.\"}",
+        "time": "2026-10-02T07:01:11.100567"
+      },
+      {
+        "text": "Invalid planner output: {\"type\": \"invalid\", \"content\": \"No valid tool calls.\"}",
+        "time": "2026-10-02T07:01:15.991368"
+      },
+      {
+        "text": "Invalid planner output: {\"type\": \"invalid\", \"content\": \"No valid tool calls.\"}",
+        "time": "2026-10-02T07:01:20.541389"
+      },
+      {
+        "text": "Task stopped after 20 planning steps.",
+        "time": "2026-10-02T07:01:20.559561"
+      }
+    ]
+  },
+  {
+    "id": 35,
+    "goal": "اعمل فولدر اسمه test6",
+    "status": "completed",
+    "created_at": "2026-10-02T07:03:03.956202",
+    "steps": [
+      {
+        "action": "filesystem.create_directory",
+        "result": {
+          "success": true,
+          "result": "Directory created: test6"
+        },
+        "time": "2026-10-02T07:03:09.538533"
+      }
+    ],
+    "reflection": [
+      {
+        "text": "Planning stage 1 completed with 1 action(s). Continue toward the user's actual goal.",
+        "time": "2026-10-02T07:03:09.560002"
+      },
+      {
+        "text": "Task completed successfully.",
+        "time": "2026-10-02T07:03:13.051027"
+      }
+    ],
+    "completed_at": "2026-10-02T07:03:13.071151"
+  },
+  {
+    "id": 36,
+    "goal": "اعمل فولدر على سطح المكتب اسمه agent_test",
+    "status": "completed",
+    "created_at": "2026-10-02T07:07:21.412659",
+    "steps": [
+      {
+        "action": "filesystem.create_directory",
+        "result": {
+          "success": true,
+          "result": "Directory created: C:\\Users\\Acer\\KAREEM_AGENT\\workspace\\agent_test"
+        },
+        "time": "2026-10-02T07:07:27.081802"
+      }
+    ],
+    "reflection": [
+      {
+        "text": "Planning stage 1 completed with 1 action(s). Continue toward the user's actual goal.",
+        "time": "2026-10-02T07:07:27.100300"
+      },
+      {
+        "text": "Task completed successfully.",
+        "time": "2026-10-02T07:07:31.185687"
+      }
+    ],
+    "completed_at": "2026-10-02T07:07:31.205245"
+  },
+  {
+    "id": 37,
+    "goal": "اعمل فولدر على سطح المكتب اسمه agent_test2",
+    "status": "completed",
+    "created_at": "2026-10-03T19:55:46.117358",
+    "steps": [
+      {
+        "action": "filesystem.create_directory",
+        "result": {
+          "success": true,
+          "result": "Directory created: C:\\Users\\Acer\\KAREEM_AGENT\\workspace\\agent_test2"
+        },
+        "time": "2026-10-03T19:57:12.950061"
+      },
+      {
+        "action": "filesystem.create_directory",
+        "result": {
+          "success": true,
+          "result": "Directory created: C:\\Users\\Acer\\KAREEM_AGENT\\workspace\\agent_test2"
+        },
+        "time": "2026-10-03T19:57:18.395103"
+      }
+    ],
+    "reflection": [
+      {
+        "text": "Planning stage 1 completed with 1 action(s). Continue toward the user's actual goal.",
+        "time": "2026-10-03T19:57:12.974008"
+      },
+      {
+        "text": "Planning stage 2 completed with 1 action(s). Continue toward the user's actual goal.",
+        "time": "2026-10-03T19:57:18.416074"
+      },
+      {
+        "text": "Task completed successfully.",
+        "time": "2026-10-03T19:57:22.480679"
+      }
+    ],
+    "completed_at": "2026-10-03T19:57:22.503445"
+  },
+  {
+    "id": 38,
+    "goal": "اعمل فولدر على سطح المكتب اسمه agent_test_final",
+    "status": "active",
+    "created_at": "2026-10-03T20:01:50.000651",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 39,
+    "goal": "اعمل فولدر على سطح المكتب اسمه agent_test_final2",
+    "status": "active",
+    "created_at": "2026-10-03T20:03:57.289648",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 40,
+    "goal": "عمل ملف على سطح المكتب اسمه hello.txt واكتب فيه Hello Kareem",
+    "status": "active",
+    "created_at": "2026-10-03T20:19:59.680034",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 41,
+    "goal": "انقل hello.txt من سطح المكتب إلى Documents",
+    "status": "active",
+    "created_at": "2026-10-03T20:20:54.356780",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 42,
+    "goal": "انقل hello.txt من سطح المكتب إلى Documents",
+    "status": "active",
+    "created_at": "2026-10-03T20:28:13.042584",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 43,
+    "goal": "انسخ hello.txt من Documents إلى سطح المكتب",
+    "status": "active",
+    "created_at": "2026-10-03T20:28:50.167147",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 44,
+    "goal": "غير اسم hello.txt إلى test.txt",
+    "status": "active",
+    "created_at": "2026-10-03T20:29:11.288891",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 45,
+    "goal": "لا اقصد الملف اللي على سطح المكتب",
+    "status": "active",
+    "created_at": "2026-10-03T20:29:40.586424",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 46,
+    "goal": "اقصد الملف الي على سطح المكتب",
+    "status": "active",
+    "created_at": "2026-10-03T20:30:01.434567",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 47,
+    "goal": "اعمل فولدر على سطح المكتب اسمه KAREEM_TEST",
+    "status": "active",
+    "created_at": "2026-10-03T20:48:24.785409",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 48,
+    "goal": "اعمل فولدر على سطح المكتب اسمه KAREEM_TEST",
+    "status": "active",
+    "created_at": "2026-10-03T20:50:19.758467",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 49,
+    "goal": "اعمل فولدر على سطح المكتب اسمه KAREEM_TEST",
+    "status": "active",
+    "created_at": "2026-10-03T20:58:25.321615",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 50,
+    "goal": "اعمل فولدر على سطح المكتب اسمه AGENT_TEST، وجواه ملف اسمه hello.txt واكتب فيه Hello from KAREEM AGENT",
+    "status": "active",
+    "created_at": "2026-10-03T22:03:54.167734",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 51,
+    "goal": "ابحث على الويب عن الموقع الرسمي لـ OpenAI، افتح النتيجة الصحيحة، وبعدها اعمل ملف على سطح المكتب اسمه openai_info.txt واكتب فيه اسم الموقع والرابط ووصف مختصر عنه.",
+    "status": "active",
+    "created_at": "2026-10-03T22:05:18.849858",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 52,
+    "goal": "افتح جوجل في المتصفح",
+    "status": "active",
+    "created_at": "2026-10-03T22:14:47.628907",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 53,
+    "goal": "استخدم أداة المتصفح browser وافتح الرابط https://www.google.com",
+    "status": "active",
+    "created_at": "2026-10-03T22:15:51.384372",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 54,
+    "goal": "افتح جوجل وابحث عن OpenAI",
+    "status": "active",
+    "created_at": "2026-10-03T22:19:32.110078",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 55,
+    "goal": "افتح جوجل وابحث عن OpenAI",
+    "status": "active",
+    "created_at": "2026-10-03T22:20:17.808661",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 56,
+    "goal": "افتح جوجل في المتصفح",
+    "status": "active",
+    "created_at": "2026-10-03T22:21:13.495539",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 57,
+    "goal": "افتح جوجل وابحث عن OpenAI",
+    "status": "active",
+    "created_at": "2026-10-03T22:21:28.660958",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 58,
+    "goal": "افتح جوجل في المتصفح",
+    "status": "active",
+    "created_at": "2026-10-03T22:26:10.302596",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 59,
+    "goal": "افتح جوجل وابحث عن OpenAI",
+    "status": "active",
+    "created_at": "2026-10-03T22:26:24.859803",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 60,
+    "goal": "افتح جوجل وابحث عن OpenAI",
+    "status": "active",
+    "created_at": "2026-10-03T22:30:19.258510",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 61,
+    "goal": "طب ابحث عن يوتيوب وهات فيديو ل اياد اموجي",
+    "status": "active",
+    "created_at": "2026-10-03T22:31:37.443442",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 62,
+    "goal": "افتح جوجل وابحث عن OpenAI، شوف النتائج واقرأ أول نتيجة مفيدة، وبعدها اعمل ملف على سطح المكتب اسمه ai_result.txt واكتب فيه ملخص اللي لقيته",
+    "status": "active",
+    "created_at": "2026-10-03T22:40:35.694664",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 63,
+    "goal": "افتح جوجل وابحث عن OpenAI، اقرأ أول نتيجة مفيدة، وبعدها اعمل ملف على سطح المكتب اسمه ai_result.txt واكتب فيه ملخص النتيجة",
+    "status": "active",
+    "created_at": "2026-10-03T22:44:31.323785",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 64,
+    "goal": "افتح جوجل وابحث عن OpenAI، اقرأ أول نتيجة مفيدة، وبعدها اعمل ملف على سطح المكتب اسمه ai_result.txt واكتب فيه ملخص النتيجة",
+    "status": "active",
+    "created_at": "2026-10-03T22:45:53.837847",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 65,
+    "goal": "افتح جوجل وابحث عن OpenAI، اقرأ أول نتيجة مفيدة، وبعدها اعمل ملف على سطح المكتب اسمه ai_result.txt واكتب فيه ملخص النتيجة",
+    "status": "active",
+    "created_at": "2026-10-03T22:55:10.973036",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 66,
+    "goal": "افتح جوجل وابحث عن OpenAI، اقرأ أول نتيجة مفيدة، وبعدها اعمل ملف على سطح المكتب اسمه ai_result.txt واكتب فيه ملخص النتيجة",
+    "status": "active",
+    "created_at": "2026-10-03T23:02:22.736083",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 67,
+    "goal": "افتح جوجل",
+    "status": "active",
+    "created_at": "2026-10-03T23:13:54.143776",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 68,
+    "goal": "افتح جوجل وابحث عن OpenAI، اقرأ أول نتيجة مفيدة، وبعدها اعمل ملف على سطح المكتب اسمه ai_result.txt واكتب فيه ملخص النتيجة",
+    "status": "active",
+    "created_at": "2026-10-03T23:17:54.220674",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 69,
+    "goal": "افتح جوجل وابحث عن OpenAI، اقرأ أول نتيجة مفيدة، وبعدها اعمل ملف على سطح المكتب اسمه ai_result.txt واكتب فيه ملخص النتيجة",
+    "status": "active",
+    "created_at": "2026-10-03T23:36:48.076809",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 70,
+    "goal": "================================================================\nTHINK / STEP 1/24\n================================================================\n\nPLAN:\n{\n  \"type\": \"invalid\",\n  \"content\": \"{\\\"tool_calls\\\": [{\\\"name\\\": \\\"web\\\", \\\"action\\\": \\\"search\\\", \\\"parameters\\\": {\\\"query\\\": \\\"OpenAI\\\", \\\"max_results\\\": 1}}]}\"\n}\n\n================================================================\nTHINK / STEP 2/24\n================================================================\n\nPLAN:\n{\n  \"type\": \"invalid\",\n  \"content\": \"{\\\"tool_calls\\\": [{\\\"name\\\": \\\"web\\\", \\\"action\\\": \\\"search\\\", \\\"parameters\\\": {\\\"query\\\": \\\"OpenAI\\\", \\\"max_results\\\": 1}}]}\"\n}\n\n================================================================\nTHINK / STEP 3/24\n================================================================\n\nPLAN:\n{\n  \"type\": \"invalid\",\n  \"content\": \"{\\\"tool_calls\\\": [{\\\"name\\\": \\\"web\\\", \\\"action\\\": \\\"search\\\", \\\"parameters\\\": {\\\"query\\\": \\\"OpenAI\\\", \\\"max_results\\\": 1}}]}\"\n}\n\n================================================================\nTHINK / STEP 4/24\n================================================================\n\nPLAN:\n{\n  \"type\": \"invalid\",\n  \"content\": \"{\\\"tool_calls\\\": [{\\\"name\\\": \\\"web\\\", \\\"action\\\": \\\"search\\\", \\\"parameters\\\": {\\\"query\\\": \\\"OpenAI\\\", \\\"max_results\\\": 1}}]}\"\n}\n\n================================================================\nTHINK / STEP 5/24\n================================================================\n\nPLAN:\n{\n  \"type\": \"invalid\",\n  \"content\": \"{\\\"tool_calls\\\": [{\\\"name\\\": \\\"web\\\", \\\"action\\\": \\\"search\\\", \\\"parameters\\\": {\\\"query\\\": \\\"OpenAI\\\", \\\"max_results\\\": 1}}]}\"\n}\n\n================================================================\nTHINK / STEP 6/24\n================================================================\n\nPLAN:\n{\n  \"type\": \"invalid\",\n  \"content\": \"{\\\"tool_calls\\\": [{\\\"name\\\": \\\"web\\\", \\\"action\\\": \\\"search\\\", \\\"parameters\\\": {\\\"query\\\": \\\"OpenAI\\\", \\\"max_results\\\": 1}}]}\"\n}\n\n================================================================\nTHINK / STEP 7/24\n================================================================\n\nPLAN:\n{\n  \"type\": \"invalid\",\n  \"content\": \"{\\\"tool_calls\\\": [{\\\"name\\\": \\\"web\\\", \\\"action\\\": \\\"search\\\", \\\"parameters\\\": {\\\"query\\\": \\\"OpenAI\\\", \\\"max_results\\\": 1}}]}\"\n}\n\n================================================================\nTHINK / STEP 8/24\n================================================================\n\nPLAN:\n{\n  \"type\": \"invalid\",\n  \"content\": \"{\\\"tool_calls\\\": [{\\\"name\\\": \\\"web\\\", \\\"action\\\": \\\"search\\\", \\\"parameters\\\": {\\\"query\\\": \\\"OpenAI\\\", \\\"max_results\\\": 1}}]}\"\n}\n\n================================================================\nTHINK / STEP 9/24\n================================================================\n\nPLAN:\n{\n  \"type\": \"invalid\",\n  \"content\": \"{\\\"tool_calls\\\": [{\\\"name\\\": \\\"web\\\", \\\"action\\\": \\\"search\\\", \\\"parameters\\\": {\\\"query\\\": \\\"OpenAI\\\", \\\"max_results\\\": 1}}]}\"\n}\n\n================================================================\nTHINK / STEP 10/24\n================================================================\n\nPLAN:\n{\n  \"type\": \"invalid\",\n  \"content\": \"{\\\"tool_calls\\\": [{\\\"name\\\": \\\"web\\\", \\\"action\\\": \\\"search\\\", \\\"parameters\\\": {\\\"query\\\": \\\"OpenAI\\\", \\\"max_results\\\": 1}}]}\"\n}\n\n================================================================\nTHINK / STEP 11/24\n================================================================\n\nPLAN:\n{\n  \"type\": \"invalid\",\n  \"content\": \"{\\\"tool_calls\\\": [{\\\"name\\\": \\\"web\\\", \\\"action\\\": \\\"search\\\", \\\"parameters\\\": {\\\"query\\\": \\\"OpenAI\\\", \\\"max_results\\\": 1}}]}\"\n}\n\n================================================================\nTHINK / STEP 12/24\n================================================================\n\nPLAN:\n{\n  \"type\": \"invalid\",\n  \"content\": \"{\\\"tool_calls\\\": [{\\\"name\\\": \\\"web\\\", \\\"action\\\": \\\"search\\\", \\\"parameters\\\": {\\\"query\\\": \\\"OpenAI\\\", \\\"max_results\\\": 1}}]}\"\n}\n\n================================================================\nTHINK / STEP 13/24\n================================================================\n\nPLAN:\n{\n  \"type\": \"invalid\",\n  \"content\": \"{\\\"tool_calls\\\": [{\\\"name\\\": \\\"web\\\", \\\"action\\\": \\\"search\\\", \\\"parameters\\\": {\\\"query\\\": \\\"OpenAI\\\", \\\"max_results\\\": 1}}]}\"\n}\n\n================================================================\nTHINK / STEP 14/24\n================================================================\n\nPLAN:\n{\n  \"type\": \"invalid\",\n  \"content\": \"{\\\"tool_calls\\\": [{\\\"name\\\": \\\"web\\\", \\\"action\\\": \\\"search\\\", \\\"parameters\\\": {\\\"query\\\": \\\"OpenAI\\\", \\\"max_results\\\": 1}}]}\"\n}\n\n================================================================\nTHINK / STEP 15/24\n================================================================\n\nPLAN:\n{\n  \"type\": \"invalid\",\n  \"content\": \"{\\\"tool_calls\\\": [{\\\"name\\\": \\\"web\\\", \\\"action\\\": \\\"search\\\", \\\"parameters\\\": {\\\"query\\\": \\\"OpenAI\\\", \\\"max_results\\\": 1}}]}\"\n}\n\n================================================================\nTHINK / STEP 16/24\n================================================================\n\nPLAN:\n{\n  \"type\": \"invalid\",\n  \"content\": \"{\\\"tool_calls\\\": [{\\\"name\\\": \\\"web\\\", \\\"action\\\": \\\"search\\\", \\\"parameters\\\": {\\\"query\\\": \\\"OpenAI\\\", \\\"max_results\\\": 1}}]}\"\n}\n\n================================================================\nTHINK / STEP 17/24\n================================================================\n\nPLAN:\n{\n  \"type\": \"invalid\",\n  \"content\": \"{\\\"tool_calls\\\": [{\\\"name\\\": \\\"web\\\", \\\"action\\\": \\\"search\\\", \\\"parameters\\\": {\\\"query\\\": \\\"OpenAI\\\", \\\"max_results\\\": 1}}]}\"\n}\n\n================================================================\nTHINK / STEP 18/24\n================================================================\n\nPLAN:\n{\n  \"type\": \"invalid\",\n  \"content\": \"{\\\"tool_calls\\\": [{\\\"name\\\": \\\"web\\\", \\\"action\\\": \\\"search\\\", \\\"parameters\\\": {\\\"query\\\": \\\"OpenAI\\\", \\\"max_results\\\": 1}}]}\"\n}\n\n================================================================\nTHINK / STEP 19/24\n================================================================\n\nPLAN:\n{\n  \"type\": \"invalid\",\n  \"content\": \"{\\\"tool_calls\\\": [{\\\"name\\\": \\\"web\\\", \\\"action\\\": \\\"search\\\", \\\"parameters\\\": {\\\"query\\\": \\\"OpenAI\\\", \\\"max_results\\\": 1}}]}\"\n}\n\n================================================================\nTHINK / STEP 20/24\n================================================================\n\nPLAN:\n{\n  \"type\": \"invalid\",\n  \"content\": \"{\\\"tool_calls\\\": [{\\\"name\\\": \\\"web\\\", \\\"action\\\": \\\"search\\\", \\\"parameters\\\": {\\\"query\\\": \\\"OpenAI\\\", \\\"max_results\\\": 1}}]}\"\n}\n\n================================================================\nTHINK / STEP 21/24\n================================================================\n\nPLAN:\n{\n  \"type\": \"invalid\",\n  \"content\": \"{\\\"tool_calls\\\": [{\\\"name\\\": \\\"web\\\", \\\"action\\\": \\\"search\\\", \\\"parameters\\\": {\\\"query\\\": \\\"OpenAI\\\", \\\"max_results\\\": 1}}]}\"\n}\n\n================================================================\nTHINK / STEP 22/24\n================================================================\n\nPLAN:\n{\n  \"type\": \"invalid\",\n  \"content\": \"{\\\"tool_calls\\\": [{\\\"name\\\": \\\"web\\\", \\\"action\\\": \\\"search\\\", \\\"parameters\\\": {\\\"query\\\": \\\"OpenAI\\\", \\\"max_results\\\": 1}}]}\"\n}\n\n================================================================\nTHINK / STEP 23/24\n================================================================\n\nPLAN:\n{\n  \"type\": \"invalid\",\n  \"content\": \"{\\\"tool_calls\\\": [{\\\"name\\\": \\\"web\\\", \\\"action\\\": \\\"search\\\", \\\"parameters\\\": {\\\"query\\\": \\\"OpenAI\\\", \\\"max_results\\\": 1}}]}\"\n}\n\n================================================================\nTHINK / STEP 24/24\n================================================================\n\nPLAN:\n{\n  \"type\": \"invalid\",\n  \"content\": \"{\\\"tool_calls\\\": [{\\\"name\\\": \\\"web\\\", \\\"action\\\": \\\"search\\\", \\\"parameters\\\": {\\\"query\\\": \\\"OpenAI\\\", \\\"max_results\\\": 1}}]}\"\n}",
+    "status": "active",
+    "created_at": "2026-10-03T23:40:20.217424",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 71,
+    "goal": "افتح جوجل وابحث عن OpenAI، اقرأ أول نتيجة مفيدة، وبعدها اعمل ملف على سطح المكتب اسمه ai_result.txt واكتب فيه ملخص النتيجة",
+    "status": "active",
+    "created_at": "2026-10-03T23:43:50.502146",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 72,
+    "goal": "افتح جوجل وابحث عن OpenAI، اقرأ أول نتيجة مفيدة، وبعدها اعمل ملف على سطح المكتب اسمه ai_result.txt واكتب فيه ملخص النتيجة",
+    "status": "active",
+    "created_at": "2026-10-03T23:47:44.592659",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 73,
+    "goal": "ابحث عن ماكينات cnc  واعملي ملف على سطح المكتب وخلي اسمه cnc وحط جواه ملعومات عن الماكينه",
+    "status": "active",
+    "created_at": "2026-10-03T23:55:46.925743",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 74,
+    "goal": "ابحث عن ماكينات cnc  واعملي ملف على سطح المكتب وخلي اسمه cnc وحط جواه ملعومات عن الماكينه",
+    "status": "active",
+    "created_at": "2026-10-04T00:11:38.724913",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 75,
+    "goal": "استخدم كرومي الحالي وافتح جوجل",
+    "status": "active",
+    "created_at": "2026-10-04T00:38:26.331570",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 76,
+    "goal": "استخدم كرومي الحالي وافتح جوجل",
+    "status": "active",
+    "created_at": "2026-10-04T00:49:58.972472",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 77,
+    "goal": "استخدم كرومي الحالي وافتح جوجل",
+    "status": "active",
+    "created_at": "2026-10-04T01:02:47.977284",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 78,
+    "goal": "استخدم كرومي الحالي وافتح https://www.youtube.com",
+    "status": "active",
+    "created_at": "2026-10-04T01:04:27.054090",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 79,
+    "goal": "افتح جوجل وابحث عن CNC",
+    "status": "active",
+    "created_at": "2026-10-04T01:05:51.975568",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 80,
+    "goal": "استخدم كرومي الحالي وافتح جوجل",
+    "status": "active",
+    "created_at": "2026-10-04T01:12:19.414539",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 81,
+    "goal": "استخدم كرومي الحالي وافتح جوجل وبعدها افحص الصفحة",
+    "status": "active",
+    "created_at": "2026-10-04T01:12:40.546307",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 82,
+    "goal": "استخدم كرومي الحالي وافتح جوجل وبعدها افحص الصفحة",
+    "status": "active",
+    "created_at": "2026-10-04T01:16:30.190973",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 83,
+    "goal": "طب ابحث عن حل لمشكلتك وادخل ملفاتك وصلحها وقبل ما تلعب في ملفاتك اعمل ليها نسخه احطياتيه",
+    "status": "active",
+    "created_at": "2026-10-04T01:17:51.530721",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 84,
+    "goal": "استخدم كرومي الحالي وافتح جوجل وبعدها افحص الصفحة",
+    "status": "active",
+    "created_at": "2026-10-04T01:22:28.386278",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 85,
+    "goal": "طب اي الحل",
+    "status": "active",
+    "created_at": "2026-10-04T01:23:16.362572",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 86,
+    "goal": "طب إيه الحل؟",
+    "status": "active",
+    "created_at": "2026-10-04T01:33:03.948900",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 87,
+    "goal": "طب إيه الحل؟",
+    "status": "active",
+    "created_at": "2026-10-04T01:33:14.236192",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 88,
+    "goal": "استخدم كرومي الحالي وافتح جوجل وبعدها افحص الصفحة",
+    "status": "active",
+    "created_at": "2026-10-04T01:33:54.229838",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 89,
+    "goal": "استخدم كرومي الحالي وافتح جوجل وبعدها افحص الصفحة",
+    "status": "active",
+    "created_at": "2026-10-04T02:36:26.845918",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 90,
+    "goal": "استخدم كرومي الحالي وافتح جوجل وبعدها افحص الصفحة",
+    "status": "active",
+    "created_at": "2026-10-04T02:56:13.366924",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 91,
+    "goal": "استخدم كرومي الحالي وافتح جوجل وبعدها افحص الصفحة",
+    "status": "active",
+    "created_at": "2026-10-05T15:28:04.947178",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 92,
+    "goal": "استخدم كرومي الحالي وافتح جوجل وبعدها افحص الصفحة",
+    "status": "active",
+    "created_at": "2026-10-05T15:33:37.687122",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 93,
+    "goal": "استخدم كرومي الحالي وافتح جوجل وبعدها افحص الصفحة",
+    "status": "active",
+    "created_at": "2026-10-05T15:40:00.566492",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 94,
+    "goal": "افتح جوجل وابحث عن OpenAI وافتح أول نتيجة",
+    "status": "active",
+    "created_at": "2026-10-05T15:43:17.671925",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 95,
+    "goal": "افتح جوجل وابحث عن OpenAI وافتح أول نتيجة",
+    "status": "active",
+    "created_at": "2026-10-05T15:50:21.892406",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 96,
+    "goal": "افتح جوجل وابحث عن OpenAI وافتح أول نتيجة",
+    "status": "active",
+    "created_at": "2026-10-05T15:58:35.060115",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 97,
+    "goal": "افتح جوجل وابحث عن OpenAI وافتح أول نتيجة",
+    "status": "active",
+    "created_at": "2026-10-05T16:03:45.412951",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 98,
+    "goal": "افتح جوجل وابحث عن OpenAI وافتح أول نتيجة",
+    "status": "active",
+    "created_at": "2026-10-05T16:07:32.343473",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 99,
+    "goal": "افتح جوجل وابحث عن OpenAI وافتح أول نتيجة",
+    "status": "active",
+    "created_at": "2026-10-05T16:25:49.101192",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 100,
+    "goal": "افتح جوجل وابحث عن OpenAI وافتح أول نتيجة",
+    "status": "active",
+    "created_at": "2026-10-05T17:08:14.546445",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 101,
+    "goal": "ادخل جوجل وابحث عن OpenAI وافتح أول نتيجة",
+    "status": "active",
+    "created_at": "2026-10-05T17:39:08.361400",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 102,
+    "goal": "ادخل جوجل وابحث عن OpenAI وافتح أول نتيجة",
+    "status": "active",
+    "created_at": "2026-10-05T17:49:16.780730",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 103,
+    "goal": "ادخل نون وابحث عن ماكينة قهوة أقل من 500 ريال",
+    "status": "active",
+    "created_at": "2026-10-05T17:52:23.737431",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 104,
+    "goal": "ادخل نون وابحث عن ماكينة قهوة أقل من 500 ريال",
+    "status": "active",
+    "created_at": "2026-10-05T17:59:28.808619",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 105,
+    "goal": "ادخل نون وابحث عن ماكينة قهوة أقل من 500 ريال",
+    "status": "active",
+    "created_at": "2026-10-05T18:05:05.027177",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 106,
+    "goal": "ادخل نون وابحث عن ماكينة قهوة أقل من 500 ريال",
+    "status": "active",
+    "created_at": "2026-10-05T18:10:48.361763",
+    "steps": [],
+    "reflection": []
+  },
+  {
+    "id": 107,
+    "goal": "ادخل نون وابحث عن ماكينة قهوة أقل من 500 ريال",
+    "status": "active",
+    "created_at": "2026-10-05T18:17:54.651879",
+    "steps": [],
+    "reflection": []
+  }
+]

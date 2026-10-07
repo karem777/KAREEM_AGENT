@@ -1,0 +1,6 @@
+Flask
+ollama
+psutil
+requests
+httpx
+beautifulsoup4

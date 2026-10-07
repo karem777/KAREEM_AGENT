@@ -1,0 +1,9 @@
+1. Stop agent with Ctrl+C.
+2. Copy brain\planner.py and tools\browser.py and tools\registry.py into C:\Users\Acer\KAREEM_AGENT, replacing existing files.
+3. Run:
+cd C:\Users\Acer\KAREEM_AGENT
+.\.venv\Scripts\python.exe -m pip install playwright
+.\.venv\Scripts\python.exe -m playwright install chromium
+4. Start:
+.\.venv\Scripts\python.exe app.py
+The browser uses a separate profile at C:\Users\Acer\KAREEM_AGENT\browser_profile.

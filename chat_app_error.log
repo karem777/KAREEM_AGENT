@@ -1,0 +1,4 @@
+  File "C:\Users\Acer\KAREEM_AGENT\chat_app.py", line 426
+    '''
+    ^
+SyntaxError: unterminated triple-quoted string literal (detected at line 427)

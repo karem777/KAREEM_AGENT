@@ -1,0 +1,427 @@
+﻿import os
+from pathlib import Path
+from flask import Flask, jsonify, render_template_string, request
+
+from core.complete_runner import CompleteRunner
+
+ROOT = Path(__file__).resolve().parent
+PORT = 5001
+
+app = Flask(__name__)
+runner = CompleteRunner(ROOT, max_steps=80)
+
+PAGE = r'''<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KAREEM AGENT</title>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+    margin:0;
+    background:#0b0d10;
+    color:#eef2f6;
+    font-family:"Segoe UI",Tahoma,Arial,sans-serif;
+    height:100vh;
+    overflow:hidden;
+}
+
+.app{
+    height:100vh;
+    display:flex;
+    flex-direction:column;
+}
+
+.top{
+    height:60px;
+    flex:none;
+    display:flex;
+    align-items:center;
+    padding:0 20px;
+    border-bottom:1px solid #252c34;
+    background:#0e1115;
+}
+
+.logo{
+    font-size:19px;
+    font-weight:700;
+}
+
+.status{
+    margin-right:auto;
+    color:#8e99a6;
+    font-size:12px;
+}
+
+.chat{
+    flex:1;
+    overflow-y:auto;
+    padding:30px 16px;
+}
+
+.welcome{
+    text-align:center;
+    color:#8e99a6;
+    margin-top:15vh;
+    line-height:2;
+}
+
+.message{
+    max-width:780px;
+    margin:0 auto 18px;
+    display:flex;
+}
+
+.bubble{
+    padding:13px 16px;
+    border-radius:16px;
+    white-space:pre-wrap;
+    line-height:1.7;
+    word-break:break-word;
+    border:1px solid #252c34;
+}
+
+.user{
+    justify-content:flex-start;
+}
+
+.user .bubble{
+    background:#1e385f;
+    border-color:#2c538b;
+    border-bottom-right-radius:5px;
+}
+
+.agent{
+    justify-content:flex-end;
+}
+
+.agent .bubble{
+    background:#191f26;
+    border-bottom-left-radius:5px;
+}
+
+.typing{
+    max-width:780px;
+    margin:0 auto 15px;
+    color:#8e99a6;
+    font-size:13px;
+}
+
+.bottom{
+    flex:none;
+    padding:14px 16px 20px;
+    border-top:1px solid #252c34;
+    background:#0e1115;
+}
+
+.composer{
+    max-width:900px;
+    margin:auto;
+    display:flex;
+    gap:10px;
+    align-items:flex-end;
+}
+
+textarea{
+    flex:1;
+    min-height:54px;
+    max-height:180px;
+    resize:vertical;
+    padding:14px;
+    border-radius:15px;
+    border:1px solid #252c34;
+    background:#12161b;
+    color:#fff;
+    font:inherit;
+    outline:none;
+}
+
+textarea:focus{
+    border-color:#4f8cff;
+}
+
+button{
+    border:0;
+    border-radius:13px;
+    padding:13px 20px;
+    background:#4f8cff;
+    color:white;
+    font-weight:700;
+    cursor:pointer;
+}
+
+button:disabled{
+    opacity:.5;
+    cursor:default;
+}
+
+.hint{
+    max-width:900px;
+    margin:7px auto 0;
+    color:#687380;
+    font-size:11px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<div class="top">
+    <div class="logo">KAREEM AGENT</div>
+    <div class="status" id="status">جاهز</div>
+</div>
+
+<div class="chat" id="chat">
+
+<div class="welcome" id="welcome">
+    <div style="font-size:30px;font-weight:700;color:white">
+        أهلاً 👋
+    </div>
+
+    <div>
+        اكتب أي حاجة، وKAREEM AGENT هينفذ المهمة.
+    </div>
+</div>
+
+</div>
+
+<div class="bottom">
+
+<div class="composer">
+
+<textarea
+    id="input"
+    placeholder="اكتب رسالتك هنا..."
+    autofocus
+></textarea>
+
+<button id="send" onclick="sendMessage()">
+    إرسال
+</button>
+
+</div>
+
+<div class="hint">
+    Enter للإرسال • Shift+Enter لسطر جديد
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+const input = document.getElementById("input");
+const send = document.getElementById("send");
+const chat = document.getElementById("chat");
+const statusEl = document.getElementById("status");
+const welcome = document.getElementById("welcome");
+
+function addMessage(type, text){
+
+    welcome.style.display = "none";
+
+    const row = document.createElement("div");
+    row.className = "message " + type;
+
+    const bubble = document.createElement("div");
+    bubble.className = "bubble";
+    bubble.textContent = text;
+
+    row.appendChild(bubble);
+    chat.appendChild(row);
+
+    chat.scrollTop = chat.scrollHeight;
+}
+
+function getAgentText(data){
+
+    if(!data){
+        return "مفيش رد من الإيجنت.";
+    }
+
+    const keys = [
+        "answer",
+        "content",
+        "message",
+        "response",
+        "result"
+    ];
+
+    for(const key of keys){
+
+        if(
+            typeof data[key] === "string" &&
+            data[key].trim()
+        ){
+            return data[key].trim();
+        }
+    }
+
+    if(data.data){
+
+        const nested = getAgentText(data.data);
+
+        if(nested){
+            return nested;
+        }
+    }
+
+    if(data.success === false){
+
+        return "حصل خطأ: " +
+            (data.error || "خطأ غير معروف");
+    }
+
+    return JSON.stringify(data,null,2);
+}
+
+async function sendMessage(){
+
+    const message = input.value.trim();
+
+    if(!message || send.disabled){
+        return;
+    }
+
+    addMessage("user",message);
+
+    input.value = "";
+
+    send.disabled = true;
+
+    statusEl.textContent = "جاري التنفيذ...";
+
+    const typing = document.createElement("div");
+
+    typing.className = "typing";
+    typing.textContent = "KAREEM AGENT بيشتغل...";
+
+    chat.appendChild(typing);
+
+    chat.scrollTop = chat.scrollHeight;
+
+    try{
+
+        const response = await fetch(
+            "/chat",
+            {
+                method:"POST",
+                headers:{
+                    "Content-Type":"application/json"
+                },
+                body:JSON.stringify({
+                    message:message
+                })
+            }
+        );
+
+        let data;
+
+        try{
+            data = await response.json();
+        }
+        catch{
+            data = {
+                success:false,
+                error:"السيرفر رجع رد غير صالح."
+            };
+        }
+
+        typing.remove();
+
+        addMessage(
+            "agent",
+            getAgentText(data)
+        );
+
+        statusEl.textContent = "جاهز";
+
+    }
+    catch(error){
+
+        typing.remove();
+
+        addMessage(
+            "agent",
+            "تعذر الاتصال بالإيجنت: " + error
+        );
+
+        statusEl.textContent = "خطأ";
+    }
+
+    finally{
+
+        send.disabled = false;
+        input.focus();
+    }
+}
+
+input.addEventListener(
+    "keydown",
+    function(event){
+
+        if(
+            event.key === "Enter" &&
+            !event.shiftKey
+        ){
+
+            event.preventDefault();
+
+            sendMessage();
+        }
+    }
+);
+
+</script>
+
+</body>
+</html>'''
+
+@app.get("/")
+def index():
+    return render_template_string(PAGE)
+
+@app.post("/chat")
+def chat():
+
+    data = request.get_json(silent=True) or {}
+
+    message = str(
+        data.get("message","")
+    ).strip()
+
+    if not message:
+
+        return jsonify({
+            "success":False,
+            "error":"Empty message"
+        }),400
+
+    try:
+
+        result = runner.run(message)
+
+        return jsonify(result)
+
+    except Exception as exc:
+
+        return jsonify({
+            "success":False,
+            "error":f"{type(exc).__name__}: {exc}"
+        }),500
+
+if __name__ == "__main__":
+
+    app.run(
+        host="127.0.0.1",
+        port=PORT,
+        debug=False
+    )
+'''
+

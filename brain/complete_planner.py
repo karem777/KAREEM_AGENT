@@ -309,20 +309,25 @@ Choose the next action from the LIVE TOOL SCHEMA.
             pass
 
         # Compatibility fallback: ask the model for the decision again.
-        # Tool selection is never inferred from the goal domain.
+        # Clarification is deliberately not an available planner outcome.
         fallback_prompt = prompt + """
 
-Return exactly one JSON object:
+Return exactly one JSON object and nothing else:
 {"type":"tool_call","tool":"...","action":"...","arguments":{}}
 OR
 {"type":"finish","answer":"...","evidence":[]}
-OR
-{"type":"ask_user","question":"..."}
+
+Never return ask_user.
 Choose only from the LIVE TOOL SCHEMA.
 """
         try:
             value = self.brain.json(fallback_prompt, fallback=None)
             if isinstance(value, dict):
+                if value.get("type") == "ask_user":
+                    return {
+                        "type": "invalid_plan",
+                        "reason": "Planner attempted clarification instead of using available tools.",
+                    }
                 return value
         except Exception:
             pass

@@ -149,21 +149,109 @@ class CompleteRunner:
             return result
 
     def _world_from_result(self, tool, action, result):
+        """Promote successful observations into durable world state."""
+        if not self._ok(result):
+            return
         if tool == "browser":
             self.world.observe(result)
-        elif tool == "windows" and self._ok(result):
+            return
+        if tool == "computer":
+            target = result.get("target") if isinstance(result, dict) else None
+            if isinstance(target, dict):
+                self.world.state.title = target.get("title") or self.world.state.title
+                self.world.state.page_id = target.get("hwnd") or target.get("target_id") or self.world.state.page_id
+                self.world.state.facts["active_app"] = target.get("process_name") or target.get("title") or ""
+                self.world.state.facts["computer_target"] = target
+            self.world.state.facts["last_computer_action"] = action
+            self.world.state.fingerprint = self._state_fingerprint()
+            return
+        if tool == "web":
+            self.world.state.facts["last_web_action"] = action
+            if isinstance(result, dict):
+                if result.get("query"):
+                    self.world.state.facts["last_search_query"] = result.get("query")
+                if isinstance(result.get("results"), list):
+                    self.world.state.facts["search_results"] = result.get("results", [])[:12]
+                if result.get("url"):
+                    self.world.state.url = result.get("url")
+                    self.world.state.origin = self.world._origin(result.get("url"))
+                    from urllib.parse import urlparse
+                    self.world.state.domain = urlparse(result.get("url")).netloc.lower()
+                if result.get("text"):
+                    self.world.state.text = str(result.get("text"))[:12000]
+                    self.world.state.facts["page_text_available"] = True
+                if result.get("title"):
+                    self.world.state.title = str(result.get("title"))[:240]
+            self.world.state.fingerprint = self._state_fingerprint()
+            return
+        if tool == "filesystem":
+            self.world.state.facts["last_filesystem_action"] = action
+            self.world.state.facts["last_filesystem_result"] = result
+            self.world.state.fingerprint = self._state_fingerprint()
+            return
+        if tool == "windows":
             if action == "get_system_info":
                 self.world.state.facts["windows_system"] = result
-            elif action in {
-                "network",
-                "storage",
-                "processes",
-                "services",
-                "ports",
-                "events",
-                "installed_apps",
-            }:
+            elif action in {"network", "storage", "processes", "services", "ports", "events", "installed_apps"}:
                 self.world.state.facts[f"windows_{action}"] = result
+            self.world.state.fingerprint = self._state_fingerprint()
+
+    def _state_fingerprint(self):
+        import hashlib
+        payload = {
+            "url": self.world.state.url,
+            "title": self.world.state.title,
+            "page_type": self.world.state.page_type,
+            "facts": self.world.state.facts,
+        }
+        return hashlib.sha1(json.dumps(payload, ensure_ascii=False, sort_keys=True, default=str).encode()).hexdigest()
+
+    @staticmethod
+    def _same_action(item, tool, action, args):
+        return isinstance(item, dict) and item.get("tool") == tool and item.get("action") == action and item.get("arguments") == args and CompleteRunner._ok(item.get("result"))
+
+    def _progress(self, history):
+        successful = [h for h in history if self._ok(h.get("result"))]
+        last = successful[-1] if successful else None
+        return {
+            "completed_actions": [{"tool": h.get("tool"), "action": h.get("action")} for h in successful[-8:]],
+            "last_success": last,
+            "search_completed": any(h.get("tool") == "web" and h.get("action") == "search" for h in successful),
+            "web_evidence_available": any(h.get("tool") == "web" and h.get("action") == "open_url" for h in successful),
+            "file_written": any(h.get("tool") == "filesystem" and h.get("action") == "write_file" for h in successful),
+        }
+
+    def _normalize_file_action(self, user_message, tool, action, args):
+        if tool != "filesystem" or action != "write_file":
+            return args
+        low = str(user_message).lower()
+        if not any(x in low for x in ("desktop", "ديسك توب", "سطح المكتب")):
+            return args
+        out = dict(args)
+        raw = str(out.get("path") or "").strip()
+        name = Path(raw).name or "output.txt"
+        normalized = raw.lower().replace("/", "\\")
+        if not normalized.startswith(("desktop\\", "سطح المكتب\\")):
+            out["path"] = f"Desktop/{name}"
+        return out
+
+    def _duplicate_recovery_action(self, history):
+        successful = [h for h in history if self._ok(h.get("result"))]
+        if not successful:
+            return None
+        last = successful[-1]
+        tool, action, result = last.get("tool"), last.get("action"), last.get("result")
+        if tool == "web" and action == "search" and isinstance(result, dict):
+            results = result.get("results") or []
+            if results and results[0].get("url"):
+                return {"tool": "web", "action": "open_url", "arguments": {"url": results[0]["url"]}}
+        if tool == "filesystem" and action == "write_file" and isinstance(result, str):
+            marker = "File written: "
+            if marker in result:
+                return {"tool": "filesystem", "action": "read_file", "arguments": {"path": result.split(marker, 1)[1].strip()}}
+        if tool == "computer" and action == "open_app":
+            return {"tool": "computer", "action": "inspect", "arguments": {}}
+        return None
 
     def _verifier(self, contract, world, history):
         prompt = f"""
@@ -276,6 +364,7 @@ RECENT ACTIONS:
                 recovery,
                 experiences,
                 conversation,
+                self._progress(history),
             )
             print(
                 f"KAREEM_AGENT PLANNER: {time.time() - started:.2f}s",
@@ -432,6 +521,7 @@ RECENT ACTIONS:
             tool = str(plan.get("tool") or "").strip()
             action = str(plan.get("action") or "").strip()
             args = plan.get("arguments") if isinstance(plan.get("arguments"), dict) else {}
+            args = self._normalize_file_action(user_message, tool, action, args)
 
             if not tool or not action:
                 recovery = {
@@ -447,6 +537,27 @@ RECENT ACTIONS:
                         "task_id": task_id,
                     }
                 continue
+
+            if history and self._same_action(history[-1], tool, action, args):
+                next_action = self._duplicate_recovery_action(history)
+                recovery = {
+                    "type": "successful_action_repeated",
+                    "instruction": "The previous identical action already succeeded. Advance to a new action; do not repeat it.",
+                    "suggested_next_action": next_action,
+                }
+                if next_action:
+                    tool, action, args = next_action["tool"], next_action["action"], next_action["arguments"]
+                else:
+                    continue
+
+            if tool == "filesystem" and action == "write_file":
+                research_task = any(k in str(user_message).lower() for k in ("ابحث", "معلومات", "research", "search", "مصدر", "source"))
+                if research_task and not self._progress(history)["web_evidence_available"]:
+                    recovery = {
+                        "type": "insufficient_research_evidence",
+                        "instruction": "Do not write research yet. Open/read a real source from the successful web search first.",
+                    }
+                    continue
 
             guard = self.guard.check(
                 self.world.state.fingerprint,
@@ -513,7 +624,8 @@ RECENT ACTIONS:
             if self._ok(result):
                 recovery = {
                     "type": "continue",
-                    "instruction": "Use the new observation to decide the next action.",
+                    "instruction": "Use the new observation and TASK PROGRESS. Never repeat a successful identical action; advance toward the remaining goal.",
+                    "progress": self._progress(history),
                 }
                 recovery_streak = 0
             else:

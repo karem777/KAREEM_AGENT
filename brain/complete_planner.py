@@ -30,6 +30,7 @@ class CompletePlanner:
         recovery,
         experiences,
         conversation=None,
+        progress=None,
     ):
         return f"""
 You are KAREEM_AGENT, a local conversational AI supervisor with the ability to control a computer.
@@ -79,8 +80,19 @@ RECOVERY:
 RELEVANT EXPERIENCE:
 {self._compact((experiences or [])[:4], 3500)}
 
+TASK PROGRESS:
+{self._compact(progress or {}, 5000)}
+
 LIVE TOOLS:
 {self._compact(tools, 10000)}
+
+Planning rules for multi-step tasks:
+- Treat TASK PROGRESS and RECENT AGENT HISTORY as authoritative execution state.
+- If a previous action succeeded, advance to the next unmet part of the goal.
+- Never repeat the same successful tool/action with the same arguments unless new evidence proves it must be retried.
+- For research tasks, search results are discovery only; open/read a real source before writing factual notes.
+- Honor explicit file locations such as Desktop/ديسك توب/سطح المكتب.
+- Do not fabricate facts that were not observed in tool results or readable source text.
 
 For ACT, choose only a real tool/action from LIVE TOOLS.
 For CHAT, answer the user directly without pretending an action happened.
@@ -95,9 +107,10 @@ For CHAT, answer the user directly without pretending an action happened.
         recovery=None,
         experiences=None,
         conversation=None,
+        progress=None,
     ):
         prompt = self._build_prompt(
-            goal, world, history, tools, recovery, experiences, conversation
+            goal, world, history, tools, recovery, experiences, conversation, progress
         )
 
         try:

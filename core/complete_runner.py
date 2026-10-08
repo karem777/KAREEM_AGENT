@@ -238,6 +238,27 @@ class CompleteRunner:
             out["path"] = f"Desktop/{name}"
         return out
 
+    def _recovery_from_failure(self, history, result):
+        """Deterministic recovery for common tool failures."""
+        if not isinstance(result, dict) or result.get("success") is not False:
+            return None
+        if history and history[-1].get("tool") == "web" and history[-1].get("action") == "open_url":
+            search = next(
+                (h.get("result") for h in reversed(history)
+                 if h.get("tool") == "web" and h.get("action") == "search" and self._ok(h.get("result"))),
+                None,
+            )
+            if isinstance(search, dict):
+                current = history[-1].get("arguments", {}).get("url")
+                for item in search.get("results", []):
+                    if item.get("url") and item.get("url") != current:
+                        return {
+                            "tool": "web",
+                            "action": "open_url",
+                            "arguments": {"url": item["url"]},
+                        }
+        return None
+
     def _duplicate_recovery_action(self, history):
         successful = [h for h in history if self._ok(h.get("result"))]
         if not successful:
@@ -632,6 +653,9 @@ RECENT ACTIONS:
                 }
                 recovery_streak = 0
             else:
+                deterministic = self._recovery_from_failure(history, result)
+                if deterministic:
+                    recovery["suggested_next_action"] = deterministic
                 recovery = {
                     "type": "tool_error",
                     "error": result.get("error", "unknown") if isinstance(result, dict) else repr(result),

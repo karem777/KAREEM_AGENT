@@ -74,11 +74,14 @@ class CompleteRunner:
 
     @staticmethod
     def _ok(result):
-        return (
-            isinstance(result, dict)
-            and result.get("success") is not False
-            and not result.get("approval_required")
-        )
+        if isinstance(result, dict):
+            return (
+                result.get("success") is not False
+                and not result.get("approval_required")
+            )
+        # Some native tools (notably filesystem) return a successful
+        # human-readable string instead of a dict.
+        return isinstance(result, str) and bool(result.strip())
 
     def _execute(self, tool_name: str, action: str, arguments: dict[str, Any]):
         tool = self.registry.get(tool_name)

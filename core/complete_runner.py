@@ -291,7 +291,52 @@ RECENT ACTIONS:
             print("WORLD:", json.dumps(self.world.state.compact(), ensure_ascii=False))
             print("PLAN:", json.dumps(plan, ensure_ascii=False, indent=2))
 
+            # Action requests must never be downgraded to chat.
+            # The runtime is the final guardrail: if the user explicitly
+            # requested an operation, force the planner back into ACT mode.
+            action_request = any(
+                token in str(user_message).lower()
+                for token in (
+                    "افتح", "ابحث", "ادخل", "اضغط", "اكتب", "شغل",
+                    "نزّل", "حمل", "ثبت", "احذف", "اعمل", "روح",
+                    "open", "search", "click", "type", "launch", "install",
+                    "download", "delete", "go to", "navigate",
+                )
+            )
+
             # Supervisor/Talker mode.
+            if ptype == "chat" and action_request:
+                invalid_streak += 1
+                recovery = {
+                    "type": "planner_downgraded_action_to_chat",
+                    "planner_response": plan.get("content", ""),
+                    "instruction": (
+                        "This is an executable user request. Do NOT chat or "
+                        "claim inability. Choose exactly one real tool_call "
+                        "from LIVE TOOLS to make progress."
+                    ),
+                    "required_mode": "ACT",
+                }
+                print(
+                    "KAREEM_AGENT: rejected chat response for actionable request",
+                    flush=True,
+                )
+                if invalid_streak >= self.max_recovery_attempts:
+                    self._record_failure(
+                        task_id,
+                        user_message,
+                        step,
+                        "Planner repeatedly downgraded an actionable request to chat.",
+                    )
+                    return {
+                        "success": False,
+                        "mode": "task",
+                        "error": "Planner refused to execute an actionable request.",
+                        "task_id": task_id,
+                        "steps": step,
+                    }
+                continue
+
             if ptype == "chat":
                 answer = str(plan.get("content") or "").strip()
                 if not answer:

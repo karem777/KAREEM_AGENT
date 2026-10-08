@@ -9,6 +9,7 @@ from brain.complete_planner import CompletePlanner
 from core.conversation_store import ConversationStore
 from core.experience import ExperienceStore
 from core.loop_guard import LoopGuard
+from core.tool_router import ToolRouter
 from core.world_model import WorldModel
 from tools.complete_registry import CompleteRegistry
 
@@ -29,11 +30,47 @@ class CompleteRunner:
         self.registry = CompleteRegistry(self.workspace)
         self.world = WorldModel()
         self.guard = LoopGuard()
+        self.tool_router = ToolRouter()
         self.experience = ExperienceStore(self.workspace / "agent_memory")
         self.conversation = ConversationStore(self.workspace / "agent_memory")
         self.execution_mode = os.getenv("KAREEM_EXECUTION_MODE", "visible").strip().lower()
         self.max_recovery_attempts = int(os.getenv("KAREEM_MAX_RECOVERY", "3"))
         self._run_started_at = None
+
+    def _step_budget(self, user_message: str) -> int:
+        """Choose a practical per-task ceiling instead of spending 80 cycles by default."""
+        hard_max = max(1, int(os.getenv("KAREEM_MAX_STEPS", str(self.max_steps))))
+        text = str(user_message).lower()
+        simple = len(text.split()) <= 12
+        browser = any(k in text for k in ("http", "www.", "افتح", "موقع", "رابط", "browser", "google", "search"))
+        complex_task = any(k in text for k in ("ثم", "بعد ذلك", "وبعدين", "multiple", "research", "ابحث", "حل", "ثبت", "install", "configure", "برمج"))
+        if simple and not browser and not complex_task:
+            target = 8
+        elif browser and complex_task:
+            target = 32
+        elif browser:
+            target = 20
+        elif complex_task:
+            target = 32
+        else:
+            target = 16
+        return max(4, min(hard_max, target))
+
+    @staticmethod
+    def _classify_failure(result):
+        raw = result.get("error", "") if isinstance(result, dict) else str(result)
+        text = str(raw).lower()
+        if any(k in text for k in ("argument", "required", "unexpected keyword", "typeerror")):
+            return "bad_arguments", "Correct the arguments or inspect the tool contract before retrying."
+        if any(k in text for k in ("not found", "no such", "does not exist", "unknown tool", "action not found")):
+            return "missing_target", "Refresh discovery/inspection and choose a real target or action."
+        if any(k in text for k in ("permission", "access denied", "forbidden", "unauthorized")):
+            return "permission", "Do not repeat the blocked action; use an allowed alternative or ask only if approval is genuinely required."
+        if any(k in text for k in ("timeout", "timed out", "time-out")):
+            return "timeout", "Retry only after changing scope or strategy; avoid blind repetition."
+        if any(k in text for k in ("connection", "network", "dns", "unreachable")):
+            return "network", "Refresh the connection/state and try a different route if available."
+        return "unknown", "Inspect the latest state and choose a materially different recovery action."
 
     @staticmethod
     def _ok(result):
@@ -210,7 +247,8 @@ RECENT ACTIONS:
         conversation = self.conversation.recent(limit=12)
 
         contract = {"goal": user_message}
-        experiences = self.experience.search(user_message, limit=5)
+        experiences = self.experience.search(user_message, limit=4)
+        step_budget = self._step_budget(user_message)
         history: list[dict[str, Any]] = []
         recovery: dict[str, Any] = {}
         invalid_streak = 0
@@ -219,8 +257,10 @@ RECENT ACTIONS:
         self.world = WorldModel()
         self.guard = LoopGuard()
 
-        for step in range(1, self.max_steps + 1):
-            tools = self.registry.describe_for_planner()
+        for step in range(1, step_budget + 1):
+            available = self.registry.describe()
+            allowed_tools = self.tool_router.select(user_message, available)
+            tools = self.registry.describe_for_planner(allowed_tools)
 
             started = time.time()
             plan = self.planner.plan(
@@ -241,7 +281,7 @@ RECENT ACTIONS:
 
             print()
             print("=" * 78)
-            print(f"KAREEM_AGENT | STEP {step}/{self.max_steps}")
+            print(f"KAREEM_AGENT | STEP {step}/{step_budget}")
             print("GOAL:", json.dumps(contract, ensure_ascii=False))
             print("WORLD:", json.dumps(self.world.state.compact(), ensure_ascii=False))
             print("PLAN:", json.dumps(plan, ensure_ascii=False, indent=2))
@@ -431,7 +471,8 @@ RECENT ACTIONS:
                     "type": "tool_error",
                     "error": result.get("error", "unknown") if isinstance(result, dict) else repr(result),
                     "last_action": {"tool": tool, "action": action},
-                    "instruction": "Analyze the exact failure and recover with a different useful action.",
+                    "category": self._classify_failure(result)[0],
+                    "instruction": self._classify_failure(result)[1],
                 }
                 recovery_streak += 1
                 if recovery_streak >= self.max_recovery_attempts:
@@ -452,12 +493,12 @@ RECENT ACTIONS:
         self._record_failure(
             task_id,
             user_message,
-            self.max_steps,
-            "Goal was not verified within the cognitive step budget.",
+            step_budget,
+            f"Goal was not verified within the adaptive step budget of {step_budget}.",
         )
         return {
             "success": False,
             "mode": "task",
-            "error": f"Task stopped after {self.max_steps} adaptive agent steps.",
+            "error": f"Task stopped after {step_budget} adaptive agent steps.",
             "task_id": task_id,
         }

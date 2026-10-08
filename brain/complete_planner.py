@@ -10,6 +10,17 @@ class CompletePlanner:
     def __init__(self, brain=None):
         self.brain = brain or CompleteBrain()
 
+    @staticmethod
+    def _compact(value, limit=6000):
+        """Keep planner prompts bounded without hiding the newest state."""
+        try:
+            text = json.dumps(value, ensure_ascii=False, default=str)
+        except Exception:
+            text = str(value)
+        if len(text) <= limit:
+            return text
+        return text[:limit] + "...<trimmed>"
+
     def _build_prompt(
         self,
         goal,
@@ -54,22 +65,22 @@ USER MESSAGE:
 {json.dumps(goal.get("goal", ""), ensure_ascii=False)}
 
 CONVERSATION:
-{json.dumps((conversation or [])[-10:], ensure_ascii=False)}
+{self._compact((conversation or [])[-8:], 5000)}
 
 CURRENT WORLD:
-{json.dumps(world, ensure_ascii=False)}
+{self._compact(world, 6000)}
 
 RECENT AGENT HISTORY:
-{json.dumps(history[-4:], ensure_ascii=False)}
+{self._compact(history[-4:], 5000)}
 
 RECOVERY:
-{json.dumps(recovery or {}, ensure_ascii=False)}
+{self._compact(recovery or {}, 3000)}
 
 RELEVANT EXPERIENCE:
-{json.dumps(experiences or [], ensure_ascii=False)}
+{self._compact((experiences or [])[:4], 3500)}
 
 LIVE TOOLS:
-{json.dumps(tools, ensure_ascii=False)}
+{self._compact(tools, 10000)}
 
 For ACT, choose only a real tool/action from LIVE TOOLS.
 For CHAT, answer the user directly without pretending an action happened.

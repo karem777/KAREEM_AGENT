@@ -104,7 +104,12 @@ class CompleteRunner:
         try:
             args = dict(arguments)
             if tool_name == "computer":
-                args.setdefault("mode", self.execution_mode)
+                # The universal WindowsOperator stores execution mode on the
+                # operator itself; its individual actions do not accept mode.
+                try:
+                    tool.mode = self.execution_mode
+                except Exception:
+                    pass
             return method(**args)
         except TypeError as exc:
             return {

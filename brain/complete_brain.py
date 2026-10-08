@@ -20,21 +20,43 @@ class CompleteBrain:
     def _options(self):
         return {
             "temperature": 0,
-            "num_ctx": int(os.getenv("KAREEM_CONTEXT", "4096")),
+            "num_ctx": int(os.getenv("KAREEM_CONTEXT", "8192")),
         }
 
-    def text(self, prompt: str) -> str:
+    @staticmethod
+    def _message_value(response, key, default=""):
+        if isinstance(response, dict):
+            message = response.get("message") or {}
+            if isinstance(message, dict):
+                return message.get(key, default) or default
+            return getattr(message, key, default) or default
+
+        message = getattr(response, "message", None) or {}
+        return getattr(message, key, default) or default
+
+    def text(self, prompt: str, json_mode=False) -> str:
         if ollama is None:
             raise RuntimeError("ollama package is not installed")
 
-        response = ollama.chat(
-            model=self.model,
-            messages=[{"role": "user", "content": prompt}],
-            options=self._options(),
-            keep_alive=os.getenv("KAREEM_KEEP_ALIVE", "10m"),
-        )
+        kwargs = {
+            "model": self.model,
+            "messages": [{"role": "user", "content": prompt}],
+            "options": self._options(),
+            "keep_alive": os.getenv("KAREEM_KEEP_ALIVE", "10m"),
+            "think": self.think,
+        }
 
-        return (response.get("message") or {}).get("content", "")
+        if json_mode:
+            kwargs["format"] = "json"
+
+        response = ollama.chat(**kwargs)
+
+        content = self._message_value(response, "content", "")
+        if content:
+            return str(content)
+
+        thinking = self._message_value(response, "thinking", "")
+        return str(thinking)
 
     def chat(self, messages, tools=None):
         """
@@ -156,7 +178,7 @@ class CompleteBrain:
 
     def json(self, prompt: str, fallback: Any = None) -> Any:
         try:
-            return self._extract_json(self.text(prompt))
+            return self._extract_json(self.text(prompt, json_mode=True))
         except Exception:
             if fallback is not None:
                 return fallback

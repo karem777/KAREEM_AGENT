@@ -113,6 +113,18 @@ For CHAT, answer the user directly without pretending an action happened.
 
             ptype = str(value.get("type") or "").strip().lower()
             if ptype == "chat":
+                # After an execution failure, chatting is not a valid recovery
+                # path. The supervisor must inspect the failure and choose a
+                # materially different tool action.
+                recovery_type = str((recovery or {}).get("type") or "").strip().lower()
+                if recovery_type in {"tool_error", "invalid_tool_call", "invalid_plan", "loop_detected", "premature_finish"}:
+                    return {
+                        "type": "invalid_plan",
+                        "reason": (
+                            "Planner chose chat during active task recovery. "
+                            "Choose a real recovery tool_call instead."
+                        ),
+                    }
                 return {"type": "chat", "content": str(value.get("content") or "").strip()}
             if ptype == "finish":
                 return {

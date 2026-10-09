@@ -8,3 +8,4 @@ pywinauto
 pyautogui
 pygetwindow
 Pillow
+pydantic>=2.7,<3

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 import time
 from typing import Any
 
@@ -27,6 +28,94 @@ class AgentRunner:
         self.cognition = CognitiveRuntime(brain=self.planner.brain)
         self.trace = TraceStore()
         self.history: list[dict[str, Any]] = []
+
+    @staticmethod
+    def _pre_route(user_message: str) -> dict[str, Any] | None:
+        """Route only narrow, unambiguous local tasks without an LLM call."""
+        text = str(user_message or "").strip()
+        if not text:
+            return None
+
+        folder = re.fullmatch(
+            r"""\s*(?:أنشئ|انشئ|اعمل|اعملّي|create|make)\s+"""
+            r"""(?:مجلد|فولدر|folder|directory)\s+"""
+            r"""(?:(?:باسم|اسمه|اسم|named)\s+)?["']?([^"'\r\n]+?)["']?\s*""",
+            text,
+            flags=re.IGNORECASE,
+        )
+        if folder:
+            name = folder.group(1).strip().rstrip(".")
+            if name and name not in {".", ".."} and not re.search(r"[\\/]", name):
+                desktop = bool(re.search(r"(?:على|في)\s+(?:سطح المكتب|الديسكتوب|desktop)", text, re.I))
+                return {
+                    "tool": "filesystem",
+                    "action": "create_directory",
+                    "arguments": {"path": f"Desktop/{name}" if desktop else name},
+                }
+
+        file_match = re.fullmatch(
+            r"""\s*(?:أنشئ|انشئ|اعمل|create|make)\s+(?:ملف|فايل|file)\s+"""
+            r"""(?:(?:باسم|اسمه|اسم|named)\s+)?([^\s"'<>|]+)\s+"""
+            r"""(?:بمحتوى|محتواه|بمحتويات|with\s+content)\s+(.+?)\s*""",
+            text,
+            flags=re.IGNORECASE,
+        )
+        if file_match:
+            name, content = file_match.group(1).strip(), file_match.group(2).strip()
+            if name and name not in {".", ".."} and not re.search(r"[\\/]", name) and content:
+                desktop = bool(re.search(r"(?:على|في)\s+(?:سطح المكتب|الديسكتوب|desktop)", text, re.I))
+                return {
+                    "tool": "filesystem",
+                    "action": "write_file",
+                    "arguments": {"path": f"Desktop/{name}" if desktop else name, "content": content},
+                }
+
+        apps = {
+            "chrome": "chrome",
+            "كروم": "chrome",
+            "google chrome": "chrome",
+            "notepad": "notepad",
+            "المفكرة": "notepad",
+            "calculator": "calc",
+            "الحاسبة": "calc",
+            "الآلة الحاسبة": "calc",
+            "explorer": "explorer",
+            "مستكشف الملفات": "explorer",
+            "vscode": "code",
+            "vs code": "code",
+            "visual studio code": "code",
+        }
+        app_pattern = re.fullmatch(
+            r"\s*(?:افتح|إفتح|شغل|شغّل|شغلّي|launch|open)\s+(.+?)\s*",
+            text,
+            flags=re.IGNORECASE,
+        )
+        if app_pattern:
+            requested = app_pattern.group(1).strip().casefold()
+            command = apps.get(requested)
+            if command:
+                return {
+                    "tool": "desktop",
+                    "action": "open_app",
+                    "arguments": {"command": command},
+                }
+        return None
+
+    def _dispatch(self, call: dict[str, Any]) -> dict[str, Any]:
+        """Validate tool/action/arguments before the compatibility executor runs."""
+        tool = str(call.get("tool") or "").strip()
+        action = str(call.get("action") or "").strip()
+        arguments = call.get("arguments") or {}
+        try:
+            self.registry.validate_call(tool, action, arguments)
+        except Exception as exc:
+            return {
+                "success": False,
+                "error": f"Tool validation failed: {exc}",
+                "tool": tool,
+                "action": action,
+            }
+        return self.executor.execute(tool, action, **arguments)
 
     def _print_step(self, step, plan):
         print("\n" + "=" * 78)
@@ -87,6 +176,18 @@ class AgentRunner:
 
     def run(self, user_message):
         self.history = [{"role": "user", "content": user_message}]
+
+        # Deterministic fast path: never invoke the local LLM for these exact,
+        # low-ambiguity filesystem/application-launch requests.
+        direct_call = self._pre_route(user_message)
+        if direct_call is not None:
+            result = self._dispatch(direct_call)
+            self._observe(
+                direct_call["tool"], direct_call["action"],
+                direct_call["arguments"], result,
+            )
+            self.trace.emit("deterministic_route", call=direct_call, result=result)
+            return result
         self.trace.emit("run_start", user_message=user_message)
         try:
             goal = self.cognition.start(user_message)
@@ -161,7 +262,7 @@ class AgentRunner:
 
             print(f"\nACT {tool}.{action}")
             print(json.dumps(args, ensure_ascii=False, indent=2))
-            result = self.executor.execute(tool, action, **args)
+            result = self._dispatch({"tool": tool, "action": action, "arguments": args})
             print("\nOBSERVE:")
             print(json.dumps(result, ensure_ascii=False, indent=2, default=str)[:24000])
             self._observe(tool, action, args, result)

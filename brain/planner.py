@@ -262,10 +262,14 @@ class Planner:
         latest_result = None
         for item in reversed(history):
             if isinstance(item, dict) and item.get("role") == "tool":
+                result_value = item.get("result")
+                serialized_result = json.dumps(result_value, ensure_ascii=False, default=str)
+                if len(serialized_result) > 3500:
+                    result_value = {"truncated_result": serialized_result[:3500]}
                 latest_result = {
                     "tool": item.get("tool"),
                     "action": item.get("action"),
-                    "result": item.get("result"),
+                    "result": result_value,
                 }
                 break
 
@@ -297,8 +301,14 @@ class Planner:
                     system_prompt + "\n\nCURRENT REQUEST:\n" +
                     json.dumps(request, ensure_ascii=False, separators=(",", ":"))
                 ) or "").strip()
-                cleaned = re.sub(r"^\`\`\`(?:json)?\s*", "", raw, flags=re.I)
-                cleaned = re.sub(r"\s*\`\`\`$", "", cleaned).strip()
+                cleaned = raw.strip()
+                if cleaned.startswith("```"):
+                    lines = cleaned.splitlines()
+                    if lines and lines[0].lstrip().startswith("```"):
+                        lines = lines[1:]
+                    if lines and lines[-1].strip() == "```":
+                        lines = lines[:-1]
+                    cleaned = "\\n".join(lines).strip()
                 data = json.loads(cleaned)
 
                 # Compatibility with the prior {"call": {...}} response shape.

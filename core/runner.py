@@ -39,6 +39,7 @@ class AgentRunner:
         folder = re.fullmatch(
             r"""\s*(?:أنشئ|انشئ|اعمل|اعملّي|create|make)\s+"""
             r"""(?:مجلد|فولدر|folder|directory)\s+"""
+            r"""(?:(?:على|في)\s+(?:سطح المكتب|الديسكتوب|desktop)\s+)?"""
             r"""(?:(?:باسم|اسمه|اسم|named)\s+)?["']?([^"'\r\n]+?)["']?\s*""",
             text,
             flags=re.IGNORECASE,

@@ -308,7 +308,7 @@ class Planner:
                         lines = lines[1:]
                     if lines and lines[-1].strip() == "```":
                         lines = lines[:-1]
-                    cleaned = "\\n".join(lines).strip()
+                    cleaned = "\n".join(lines).strip()
                 data = json.loads(cleaned)
 
                 # Compatibility with the prior {"call": {...}} response shape.

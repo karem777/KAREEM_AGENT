@@ -17,15 +17,15 @@ def normalize_url(url):
     if m:
         return m.group(1)
 
-    # urllib on Windows can fail on Arabic/non-ASCII URL characters.
+    # Encode non-ASCII URL components so urllib works reliably on Windows.
     try:
         parsed = urlparse(url)
         if parsed.scheme in {"http", "https"}:
             path = quote(unquote(parsed.path), safe="/:@-._~!    return url
 
 
-def unwrap_ddg'()*+,;=")
-            query = quote(unquote(parsed.query), safe="=&/?@:+,;%-._~!(url):
+def unwrap_ddg(url):'()*+,;=%")
+            query = quote(unquote(parsed.query), safe="=&/?@:+,;%-._~!
     url = normalize_url(url)
 
     try:
@@ -422,8 +422,8 @@ class WebTool:
                 },
             },
         }
-()*")
-            fragment = quote(unquote(parsed.fragment), safe="=&/?@:+,;%-._~!(url):
+()*+,;=%")
+            fragment = quote(unquote(parsed.fragment), safe="=&/?@:+,;%-._~!
     url = normalize_url(url)
 
     try:
@@ -820,10 +820,11 @@ class WebTool:
                 },
             },
         }
-()*")
+()*+,;=%")
             return urlunparse((parsed.scheme, parsed.netloc, path, parsed.params, query, fragment))
     except Exception:
         pass
+
     return url
 
 

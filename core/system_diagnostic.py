@@ -46,7 +46,8 @@ def _to_list(value: Any) -> list:
 def run_system_diagnostic(registry, task_id: str, goal: str) -> dict:
     """Run bounded, read-only checks and return an evidence-based health score."""
     started = time.time()
-    windows = registry.get("windows")
+    get_tool = getattr(registry, "get", None)
+    windows = get_tool("windows") if callable(get_tool) else None
     if windows is None:
         return {
             "success": False,

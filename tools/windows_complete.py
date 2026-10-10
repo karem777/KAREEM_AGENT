@@ -49,7 +49,9 @@ class WindowsTool:
         return self._run_ps(f"Get-Service | {filter_expr} Sort-Object Status,DisplayName | Select-Object -First 100 Name,DisplayName,Status | ConvertTo-Json -Depth 2")
 
     def network(self):
-        return self._run_ps("$a=Get-NetAdapter -ErrorAction SilentlyContinue | Select-Object Name,Status,LinkSpeed,MacAddress; $i=Get-NetIPConfiguration -ErrorAction SilentlyContinue | Select-Object InterfaceAlias,IPv4Address,IPv6Address,DNSServer; [pscustomobject]@{adapters=$a;config=$i}|ConvertTo-Json -Depth 5")
+        # Keep the diagnostic payload small and scalar-only so ConvertTo-Json
+        # output remains parseable even on systems with many virtual adapters.
+        return self._run_ps("$a=@(Get-NetAdapter -ErrorAction SilentlyContinue | Select-Object Name,Status,LinkSpeed); $i=@(Get-NetIPConfiguration -ErrorAction SilentlyContinue | ForEach-Object { [pscustomobject]@{InterfaceAlias=$_.InterfaceAlias; IPv4=(@($_.IPv4Address | ForEach-Object {$_.IPAddress}) -join ','); IPv6=(@($_.IPv6Address | ForEach-Object {$_.IPAddress}) -join ','); DNS=(@($_.DNSServer.ServerAddresses) -join ',')} }); [pscustomobject]@{adapters=$a;config=$i}|ConvertTo-Json -Depth 3 -Compress")
 
     def ports(self):
         return self._run_ps("Get-NetTCPConnection -ErrorAction SilentlyContinue | Select-Object -First 150 LocalAddress,LocalPort,RemoteAddress,RemotePort,State,OwningProcess | ConvertTo-Json -Depth 4")
@@ -67,7 +69,12 @@ class WindowsTool:
         return self._run_ps(script)
 
     def events(self, log_name="System", hours=24, limit=100):
-        script = f"$s=(Get-Date).AddHours(-{float(hours)}); Get-WinEvent -FilterHashtable @{{LogName='{log_name}';StartTime=$s}} -MaxEvents {int(limit)} -ErrorAction SilentlyContinue | Select-Object TimeCreated,Id,ProviderName,LevelDisplayName,Message | ConvertTo-Json -Depth 4"
+        # The diagnostic only needs event severity counts. Omitting long Message
+        # bodies prevents stdout truncation from breaking JSON parsing.
+        safe_log = str(log_name).replace("'", "''")
+        safe_hours = max(1.0, min(8760.0, float(hours)))
+        safe_limit = max(1, min(200, int(limit)))
+        script = f"$s=(Get-Date).AddHours(-{safe_hours}); @(Get-WinEvent -FilterHashtable @{{LogName='{safe_log}';StartTime=$s}} -MaxEvents {safe_limit} -ErrorAction SilentlyContinue | Select-Object TimeCreated,Id,ProviderName,LevelDisplayName | ConvertTo-Json -Depth 3 -Compress)"
         return self._run_ps(script, timeout=40)
 
     def launch_app(self, app, args=None):

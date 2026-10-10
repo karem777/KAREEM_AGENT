@@ -86,18 +86,84 @@ class WindowsTool:
             return {"success": False, "error": str(exc)}
 
     def close_process(self, name_or_pid, confirm=False):
+        """Terminate one explicitly approved non-critical process, with guardrails."""
         if not confirm:
-            return {"success": False, "approval_required": True, "reason": "Closing a process changes system state. Set confirm=true."}
+            return {"success": False, "approval_required": True, "reason": "Closing a process changes system state. Confirm the exact process name or PID first."}
         try:
             import psutil
-            target = int(name_or_pid) if str(name_or_pid).isdigit() else None
-            killed = []
-            for p in psutil.process_iter(["pid", "name"]):
-                if (target is not None and p.info["pid"] == target) or (target is None and (p.info.get("name") or "").lower() == str(name_or_pid).lower()):
-                    p.terminate(); killed.append(p.info["pid"])
-            return {"success": True, "terminated": killed}
+
+            protected_names = {
+                "system", "registry", "smss.exe", "csrss.exe", "wininit.exe",
+                "services.exe", "lsass.exe", "winlogon.exe", "svchost.exe",
+                "fontdrvhost.exe", "dwm.exe", "secure system", "memory compression",
+                "system idle process", "idle", "taskhostw.exe", "sihost.exe",
+                "ollama.exe", "ollama_llama_server.exe", "python.exe", "pythonw.exe",
+                "powershell.exe", "pwsh.exe", "cmd.exe", "explorer.exe",
+                "msmpeng.exe", "securityhealthservice.exe",
+            }
+            raw_target = str(name_or_pid or "").strip()
+            if not raw_target:
+                return {"success": False, "error": "A process name or PID is required."}
+            target_pid = int(raw_target) if raw_target.isdigit() else None
+            matches = []
+            for proc in psutil.process_iter(["pid", "name", "username"]):
+                try:
+                    info = proc.info
+                    matched = (
+                        info.get("pid") == target_pid
+                        if target_pid is not None
+                        else (info.get("name") or "").casefold() == raw_target.casefold()
+                    )
+                    if matched:
+                        matches.append((proc, info))
+                except (psutil.NoSuchProcess, psutil.AccessDenied):
+                    continue
+
+            if not matches:
+                return {"success": False, "error": f"No process matched {raw_target!r}."}
+            if len(matches) > 1:
+                return {
+                    "success": False,
+                    "approval_required": True,
+                    "reason": "Multiple processes match this name. Choose one exact PID; nothing was closed.",
+                    "matches": [{"pid": info.get("pid"), "name": info.get("name")} for _, info in matches[:20]],
+                }
+
+            proc, info = matches[0]
+            pid = info.get("pid")
+            process_name = str(info.get("name") or "").casefold()
+            username = str(info.get("username") or "").casefold()
+            if pid in {0, 4, os.getpid()} or process_name in protected_names:
+                return {
+                    "success": False,
+                    "blocked": True,
+                    "reason": "This process is protected because it is a core Windows, security, shell, or agent/runtime process.",
+                    "pid": pid,
+                    "name": info.get("name"),
+                }
+            if username.endswith("\\system") or username in {"system", "nt authority\\system", "nt authority\\local service", "nt authority\\network service"}:
+                return {
+                    "success": False,
+                    "blocked": True,
+                    "reason": "Processes running as Windows service identities are protected.",
+                    "pid": pid,
+                    "name": info.get("name"),
+                }
+
+            proc.terminate()
+            try:
+                proc.wait(timeout=3)
+            except psutil.TimeoutExpired:
+                return {
+                    "success": False,
+                    "terminated": False,
+                    "reason": "The process did not exit within 3 seconds; it was not force-killed.",
+                    "pid": pid,
+                    "name": info.get("name"),
+                }
+            return {"success": True, "terminated": [pid], "name": info.get("name"), "verified_exited": not proc.is_running()}
         except Exception as exc:
-            return {"success": False, "error": str(exc)}
+            return {"success": False, "error": f"{type(exc).__name__}: {exc}"}
 
     def powershell(self, command, confirm=False, timeout=45):
         if self.DANGEROUS.search(command) and not confirm:

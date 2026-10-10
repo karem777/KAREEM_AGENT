@@ -82,7 +82,15 @@ class DesktopTool:
         err = self._need_gui()
         if err:
             return err
-        self._pyautogui.click(int(x), int(y), clicks=int(clicks), interval=float(interval), button=str(button))
+        x, y = int(x), int(y)
+        width, height = self._pyautogui.size()
+        if not (0 <= x < width and 0 <= y < height):
+            return {"success": False, "error": "Coordinates are outside the primary screen.", "screen": [int(width), int(height)]}
+        if int(clicks) < 1 or int(clicks) > 3:
+            return {"success": False, "error": "clicks must be between 1 and 3."}
+        if str(button).lower() not in {"left", "right", "middle"}:
+            return {"success": False, "error": "button must be left, right, or middle."}
+        self._pyautogui.click(x, y, clicks=int(clicks), interval=max(0.0, min(float(interval), 1.0)), button=str(button).lower())
         return {"success": True, "x": int(x), "y": int(y), "clicks": int(clicks), "button": str(button)}
 
     def double_click(self, x: int, y: int):
@@ -92,7 +100,11 @@ class DesktopTool:
         err = self._need_gui()
         if err:
             return err
-        self._pyautogui.moveTo(int(x), int(y), duration=float(duration))
+        x, y = int(x), int(y)
+        width, height = self._pyautogui.size()
+        if not (0 <= x < width and 0 <= y < height):
+            return {"success": False, "error": "Coordinates are outside the primary screen.", "screen": [int(width), int(height)]}
+        self._pyautogui.moveTo(x, y, duration=max(0.0, min(float(duration), 2.0)))
         return {"success": True, "x": int(x), "y": int(y)}
 
     def scroll(self, clicks: int, x: int | None = None, y: int | None = None):
@@ -108,14 +120,20 @@ class DesktopTool:
         err = self._need_gui()
         if err:
             return err
-        self._pyautogui.write(str(text), interval=float(interval))
-        return {"success": True, "text_length": len(str(text))}
+        text = str(text)
+        if len(text) > 2000:
+            return {"success": False, "error": "Text input is limited to 2000 characters per action."}
+        self._pyautogui.write(text, interval=max(0.0, min(float(interval), 0.1)))
+        return {"success": True, "text_length": len(text)}
 
     def hotkey(self, *keys: str):
         err = self._need_gui()
         if err:
             return err
-        keys = tuple(str(k) for k in keys if str(k))
+        keys = tuple(str(k).strip().lower() for k in keys if str(k).strip())
+        allowed = {"ctrl", "control", "alt", "shift", "win", "command", "enter", "tab", "esc", "escape", "space", "backspace", "delete", "home", "end", "pageup", "pagedown", "up", "down", "left", "right", "insert"} | {f"f{i}" for i in range(1, 13)} | {chr(i) for i in range(97, 123)} | {str(i) for i in range(10)}
+        if len(keys) > 4 or any(k not in allowed for k in keys):
+            return {"success": False, "error": "Hotkey contains unsupported keys or more than four keys."}
         if not keys:
             return {"success": False, "error": "No keys supplied."}
         self._pyautogui.hotkey(*keys)
@@ -132,6 +150,10 @@ class DesktopTool:
         command = str(command or "").strip()
         if not command:
             return {"success": False, "error": "command is required"}
+        if len(command) > 260 or any(ord(ch) < 32 for ch in command):
+            return {"success": False, "error": "Invalid application command."}
+        if len(args or []) > 20:
+            return {"success": False, "error": "Too many application arguments."}
         argv = [command] + [str(x) for x in (args or [])]
         try:
             proc = subprocess.Popen(argv, shell=False)

@@ -13,6 +13,7 @@ from core.tool_router import ToolRouter
 from core.world_model import WorldModel
 from tools.complete_registry import CompleteRegistry
 from core.system_diagnostic import is_system_diagnostic_request, run_system_diagnostic
+from core.ram_optimizer import is_ram_optimization_request, run_ram_review
 
 
 class CompleteRunner:
@@ -360,6 +361,32 @@ RECENT ACTIONS:
         if execution_mode:
             mode = str(execution_mode).strip().lower()
             self.execution_mode = "background" if mode == "background" else "visible"
+
+        # Explicit RAM requests use a deterministic, read-only review rather than LLM planning.
+        # The review measures RAM and ranks processes but never closes applications automatically.
+        if is_ram_optimization_request(user_message):
+            self.conversation.append("user", user_message)
+            try:
+                ram_review = run_ram_review(self.registry, task_id, user_message)
+            except Exception as exc:
+                ram_review = {
+                    "success": False,
+                    "mode": "task",
+                    "task_id": task_id,
+                    "error": f"RAM review failed: {type(exc).__name__}: {exc}",
+                    "evidence": [],
+                }
+            self.conversation.append(
+                "assistant",
+                ram_review.get("answer") or ram_review.get("error", "RAM review failed."),
+                {"task_id": task_id, "outcome": "success" if ram_review.get("success") else "failure"},
+            )
+            print("KAREEM_AGENT RAM REVIEW COMPLETE", json.dumps({
+                "success": ram_review.get("success"),
+                "checks_completed": ram_review.get("checks_completed"),
+                "elapsed_seconds": ram_review.get("elapsed_seconds"),
+            }, ensure_ascii=False), flush=True)
+            return ram_review
 
         # Explicit PC-health requests use deterministic read-only Windows checks.
         # This avoids relying on the LLM to discover tools or accidentally answer as chat.

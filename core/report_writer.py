@@ -78,11 +78,32 @@ def write_task_report(
         "",
         "الأدلة/الإجراءات المسجلة:",
     ]
+    findings = result.get("findings")
+    if isinstance(findings, list) and findings:
+        lines.extend(["", "النتائج والمشاكل المرصودة:"])
+        for item in findings[:40]:
+            if isinstance(item, dict):
+                severity = _clean(item.get("severity", "unknown"), 40)
+                finding = _clean(item.get("finding", ""), 1000)
+                if finding:
+                    lines.append(f"- [{severity}] {finding}")
+
     evidence = result.get("evidence")
     if isinstance(evidence, list) and evidence:
+        lines.extend(["", "تفاصيل الفحوصات:"])
         for index, item in enumerate(evidence, 1):
             if not isinstance(item, dict):
                 continue
+            # Deterministic system diagnostics use check/status/error fields.
+            if "check" in item:
+                check = _clean(item.get("check", "unknown"), 100)
+                status_value = _clean(item.get("status", "unknown"), 40)
+                elapsed = item.get("elapsed_seconds", "غير متاح")
+                lines.append(f"{index}. {check} — الحالة: {status_value} — المدة: {elapsed} ثانية")
+                if item.get("error"):
+                    lines.append(f"   الخطأ: {_clean(item.get('error'), 700)}")
+                continue
+            # Planner-based tasks use tool/action/result fields.
             tool = _clean(item.get("tool", "?"), 100)
             action = _clean(item.get("action", "?"), 100)
             outcome = item.get("result")

@@ -51,6 +51,7 @@ class FakeRegistry:
 class SystemDiagnosticTests(unittest.TestCase):
     def test_detects_arabic_and_english_diagnostic_requests(self):
         self.assertTrue(is_system_diagnostic_request("عايزك تفحص الجهاز وتقيمه من 100"))
+        self.assertTrue(is_system_diagnostic_request("افحص جهازي بالكامل، وقيّم حالته من 100"))
         self.assertTrue(is_system_diagnostic_request("Please run a system diagnostic"))
         self.assertFalse(is_system_diagnostic_request("Explain what RAM means"))
 

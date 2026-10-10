@@ -37,6 +37,7 @@ def _json_stdout(value: Any) -> Any:
 
 def _process_rows(value: Any) -> list[dict[str, Any]]:
     data = _json_stdout(value)
+    rows = []
     if isinstance(data, dict):
         rows = data.get("processes")
         if rows is None and ("ProcessName" in data or "name" in data):

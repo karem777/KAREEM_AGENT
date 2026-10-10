@@ -111,9 +111,18 @@ class DesktopTool:
         err = self._need_gui()
         if err:
             return err
+        if (x is None) != (y is None):
+            return {"success": False, "error": "x and y must be supplied together."}
         if x is not None and y is not None:
-            self._pyautogui.moveTo(int(x), int(y), duration=0.05)
-        self._pyautogui.scroll(int(clicks))
+            x, y = int(x), int(y)
+            width, height = self._pyautogui.size()
+            if not (0 <= x < width and 0 <= y < height):
+                return {"success": False, "error": "Coordinates are outside the primary screen.", "screen": [int(width), int(height)]}
+            self._pyautogui.moveTo(x, y, duration=0.05)
+        clicks = int(clicks)
+        if abs(clicks) > 20:
+            return {"success": False, "error": "Scroll amount is limited to 20 clicks per action."}
+        self._pyautogui.scroll(clicks)
         return {"success": True, "clicks": int(clicks)}
 
     def type_text(self, text: str, interval: float = 0.01):
@@ -143,8 +152,15 @@ class DesktopTool:
         err = self._need_gui()
         if err:
             return err
-        self._pyautogui.press(str(key), presses=int(presses), interval=float(interval))
-        return {"success": True, "key": str(key), "presses": int(presses)}
+        key = str(key).strip().lower()
+        allowed = {"enter", "tab", "esc", "escape", "space", "backspace", "delete", "home", "end", "pageup", "pagedown", "up", "down", "left", "right", "insert"} | {f"f{i}" for i in range(1, 13)} | {chr(i) for i in range(97, 123)} | {str(i) for i in range(10)}
+        presses = int(presses)
+        if key not in allowed:
+            return {"success": False, "error": "Unsupported key."}
+        if presses < 1 or presses > 20:
+            return {"success": False, "error": "presses must be between 1 and 20."}
+        self._pyautogui.press(key, presses=presses, interval=max(0.0, min(float(interval), 1.0)))
+        return {"success": True, "key": key, "presses": presses}
 
     def open_app(self, command: str, args: list[str] | None = None, wait_seconds: float = 1.0):
         command = str(command or "").strip()

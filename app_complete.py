@@ -68,6 +68,7 @@ function add(x){
 const sleep=(ms)=>new Promise(resolve=>setTimeout(resolve,ms));
 async function pollTask(taskId){
   add('تم إرسال المهمة للخلفية. المعرّف: '+taskId);
+  let previousStatus='';
   while(true){
     await sleep(1500);
     let response, data;
@@ -79,7 +80,7 @@ async function pollTask(taskId){
       continue;
     }
     if(!response.ok){add(data);return;}
-    add('الحالة: '+data.status);
+    if(data.status!==previousStatus){add('الحالة: '+data.status);previousStatus=data.status;}
     if(['completed','failed','needs_approval'].includes(data.status)){
       add(data);
       if(data.report_path) add('تقرير TXT: '+data.report_path);
@@ -108,6 +109,7 @@ async function runTask(){
     else {
       add(data);
       if(data.report_path) add('تقرير TXT: '+data.report_path);
+      else if(data.report_error) add('تعذر إنشاء التقرير: '+data.report_error);
     }
   }catch(error){add('فشل الاتصال بالتطبيق: '+error);}
   finally{submitButton.disabled=false;}
@@ -150,16 +152,17 @@ def chat():
         result = runner.run(message, execution_mode="visible")
     except Exception as exc:
         result = {"success": False, "error": f"{type(exc).__name__}: {exc}"}
-    try:
-        result["report_path"] = write_task_report(
-            task_id=str(result.get("task_id") or int(started * 1000)),
-            goal=message,
-            result=result,
-            started_at=started,
-            finished_at=time.time(),
-        )
-    except Exception as exc:
-        result["report_error"] = f"{type(exc).__name__}: {exc}"
+    if result.get("mode") != "chat":
+        try:
+            result["report_path"] = write_task_report(
+                task_id=str(result.get("task_id") or int(started * 1000)),
+                goal=message,
+                result=result,
+                started_at=started,
+                finished_at=time.time(),
+            )
+        except Exception as exc:
+            result["report_error"] = f"{type(exc).__name__}: {exc}"
     return jsonify(result)
 
 

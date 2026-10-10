@@ -6,7 +6,6 @@ that diagnostics cannot be downgraded to chat or spin through planner retries.
 from __future__ import annotations
 
 import json
-import re
 import time
 from typing import Any
 
@@ -146,8 +145,8 @@ def run_system_diagnostic(registry, task_id: str, goal: str) -> dict:
                 score -= 12 if health == "unhealthy" else 5
                 findings.append({"severity": "high" if health == "unhealthy" else "medium",
                                  "finding": f"Volume {volume.get('DriveLetter') or volume.get('FileSystemLabel') or '(unnamed)'} reports health status: {health}."})
-    elif "storage" not in collected:
-        findings.append({"severity": "unknown", "finding": "Volume health check did not return data."})
+    else:
+        findings.append({"severity": "unknown", "finding": "Volume health check did not return parseable data."})
 
     events_data = _parse_json_output(collected.get("events"))
     if events_data is not None:
@@ -162,8 +161,8 @@ def run_system_diagnostic(registry, task_id: str, goal: str) -> dict:
             findings.append({"severity": "medium", "finding": f"{errors} error-level System event(s) found in the last 24 hours."})
         if not critical and not errors:
             findings.append({"severity": "info", "finding": "No Critical/Error System events were returned for the last 24 hours."})
-    elif "events" not in collected:
-        findings.append({"severity": "unknown", "finding": "Recent System event logs could not be assessed."})
+    else:
+        findings.append({"severity": "unknown", "finding": "Recent System event logs could not be assessed from parseable data."})
 
     network_data = _parse_json_output(collected.get("network"))
     if isinstance(network_data, dict):
@@ -175,12 +174,21 @@ def run_system_diagnostic(registry, task_id: str, goal: str) -> dict:
             findings.append({"severity": "info", "finding": "At least one network adapter reports Up status."})
         else:
             findings.append({"severity": "unknown", "finding": "No adapter data was returned; network status is uncertain."})
-    elif "network" not in collected:
-        findings.append({"severity": "unknown", "finding": "Network adapter state could not be assessed."})
+    else:
+        findings.append({"severity": "unknown", "finding": "Network adapter state could not be assessed from parseable data."})
 
-    score = max(0, min(100, int(round(score))))
     completed_checks = sum(1 for item in evidence if item["status"] == "passed")
     total_checks = len(checks)
+    missing_checks = total_checks - completed_checks
+    if missing_checks:
+        # Missing telemetry is not treated as healthy; reduce confidence separately
+        # from hardware-risk penalties and disclose it in the findings.
+        score -= min(15, missing_checks * 3)
+        findings.append({
+            "severity": "unknown",
+            "finding": f"{missing_checks} diagnostic check(s) failed; the score is less reliable.",
+        })
+    score = max(0, min(100, int(round(score))))
     summary = (
         f"تقييم صحة الجهاز المبدئي: {score}/100. "
         f"اكتمل {completed_checks} من {total_checks} فحوصات للقراءة فقط. "

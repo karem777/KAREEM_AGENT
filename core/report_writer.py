@@ -34,8 +34,14 @@ def desktop_directory() -> Path:
 
 def _clean(value: Any, limit: int = 1200) -> str:
     text = str(value or "")
+
+    def redact(match: re.Match[str]) -> str:
+        if match.lastindex:
+            return f"{match.group(1)}=[REDACTED]"
+        return "[REDACTED]"
+
     for pattern in _SECRET_PATTERNS:
-        text = pattern.sub(r"\1=[REDACTED]" if "authorization" not in pattern.pattern.lower() else "Authorization: [REDACTED]", text)
+        text = pattern.sub(redact, text)
     return text[:limit]
 
 
@@ -47,7 +53,7 @@ def write_task_report(
     finished_at: float | None = None,
     desktop_dir: str | Path | None = None,
 ) -> str:
-    """Write a concise, secret-conscious TXT report for a completed agent task."""
+    """Write a concise, secret-conscious TXT report for an agent task."""
     started = datetime.fromtimestamp(started_at).astimezone().isoformat(timespec="seconds") if started_at else "غير متاح"
     finished = datetime.fromtimestamp(finished_at).astimezone().isoformat(timespec="seconds") if finished_at else datetime.now().astimezone().isoformat(timespec="seconds")
     success = bool(result.get("success"))

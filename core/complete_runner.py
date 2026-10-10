@@ -12,6 +12,7 @@ from core.loop_guard import LoopGuard
 from core.tool_router import ToolRouter
 from core.world_model import WorldModel
 from tools.complete_registry import CompleteRegistry
+from core.system_diagnostic import is_system_diagnostic_request, run_system_diagnostic
 
 
 class CompleteRunner:
@@ -359,6 +360,35 @@ RECENT ACTIONS:
         if execution_mode:
             mode = str(execution_mode).strip().lower()
             self.execution_mode = "background" if mode == "background" else "visible"
+
+        # Explicit PC-health requests use deterministic read-only Windows checks.
+        # This avoids relying on the LLM to discover tools or accidentally answer as chat.
+        if is_system_diagnostic_request(user_message):
+            self.conversation.append("user", user_message)
+            try:
+                diagnostic = run_system_diagnostic(self.registry, task_id, user_message)
+            except Exception as exc:
+                diagnostic = {
+                    "success": False,
+                    "mode": "task",
+                    "task_id": task_id,
+                    "error": f"System diagnostic failed: {type(exc).__name__}: {exc}",
+                    "score": None,
+                    "evidence": [],
+                }
+            self.conversation.append(
+                "assistant",
+                diagnostic.get("answer") or diagnostic.get("error", "System diagnostic failed."),
+                {"task_id": task_id, "outcome": "success" if diagnostic.get("success") else "failure",
+                 "score": diagnostic.get("score")},
+            )
+            print("KAREEM_AGENT DIAGNOSTIC COMPLETE", json.dumps({
+                "success": diagnostic.get("success"),
+                "score": diagnostic.get("score"),
+                "checks_completed": diagnostic.get("checks_completed"),
+                "elapsed_seconds": diagnostic.get("elapsed_seconds"),
+            }, ensure_ascii=False), flush=True)
+            return diagnostic
 
         self.conversation.append("user", user_message)
         conversation = self.conversation.recent(limit=12)

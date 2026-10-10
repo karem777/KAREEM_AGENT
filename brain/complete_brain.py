@@ -14,7 +14,8 @@ class CompleteBrain:
 
     def __init__(self, model=None, timeout=180):
         self.model = model or os.getenv("KAREEM_MODEL", "qwen3:8b")
-        self.timeout = timeout
+        self.timeout = float(timeout)
+        self.client = ollama.Client(timeout=self.timeout) if ollama is not None else None
         self.think = os.getenv("KAREEM_THINK", "0").strip().lower() in {"1", "true", "yes", "on"}
 
     def _options(self):
@@ -49,7 +50,7 @@ class CompleteBrain:
         if json_mode:
             kwargs["format"] = "json"
 
-        response = ollama.chat(**kwargs)
+        response = self.client.chat(**kwargs)
 
         content = self._message_value(response, "content", "")
         if content:
@@ -79,7 +80,7 @@ class CompleteBrain:
         if tools:
             kwargs["tools"] = tools
 
-        response = ollama.chat(**kwargs)
+        response = self.client.chat(**kwargs)
 
         if isinstance(response, dict):
             message = response.get("message") or {}

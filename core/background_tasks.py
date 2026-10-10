@@ -67,16 +67,19 @@ class BackgroundTaskQueue:
 
         finished = time.time()
         report_path = None
-        try:
-            report_path = write_task_report(
-                task_id=task_id,
-                goal=message,
-                result=result,
-                started_at=started,
-                finished_at=finished,
-            )
-        except Exception as exc:
-            result["report_error"] = f"{type(exc).__name__}: {exc}"
+        # A conversational reply is not a computer task and should not create a
+        # misleading Desktop execution report.
+        if result.get("mode") != "chat":
+            try:
+                report_path = write_task_report(
+                    task_id=task_id,
+                    goal=message,
+                    result=result,
+                    started_at=started,
+                    finished_at=finished,
+                )
+            except Exception as exc:
+                result["report_error"] = f"{type(exc).__name__}: {exc}"
 
         with self._lock:
             task = self._tasks.get(task_id)
